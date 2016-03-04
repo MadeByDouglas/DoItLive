@@ -24,6 +24,7 @@
 		C36515351C8827620031D525 /* FeedTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36515341C8827620031D525 /* FeedTableViewCell.swift */; };
 		C36515371C8903E20031D525 /* CurrentUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36515361C8903E20031D525 /* CurrentUser.swift */; };
 		C36515391C89042B0031D525 /* GlobalEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36515381C89042B0031D525 /* GlobalEnums.swift */; };
+		C365153C1C8969370031D525 /* userDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C365153B1C8969370031D525 /* userDataSource.swift */; };
 		C3F6F8D71C880C30007376C6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F6F8D61C880C30007376C6 /* AppDelegate.swift */; };
 		C3F6F8E01C880C30007376C6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3F6F8DE1C880C30007376C6 /* Main.storyboard */; };
 		C3F6F8E21C880C30007376C6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F6F8E11C880C30007376C6 /* Assets.xcassets */; };
@@ -48,6 +49,7 @@
 		C36515341C8827620031D525 /* FeedTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeedTableViewCell.swift; sourceTree = "<group>"; };
 		C36515361C8903E20031D525 /* CurrentUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrentUser.swift; sourceTree = "<group>"; };
 		C36515381C89042B0031D525 /* GlobalEnums.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalEnums.swift; sourceTree = "<group>"; };
+		C365153B1C8969370031D525 /* userDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = userDataSource.swift; sourceTree = "<group>"; };
 		C3F6F8D31C880C30007376C6 /* DoItLive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoItLive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3F6F8D61C880C30007376C6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C3F6F8DF1C880C30007376C6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 		C365153A1C89046A0031D525 /* Twitter Data */ = {
 			isa = PBXGroup;
 			children = (
+				C365153B1C8969370031D525 /* userDataSource.swift */,
 				C36515361C8903E20031D525 /* CurrentUser.swift */,
 			);
 			name = "Twitter Data";
@@ -235,6 +238,7 @@
 				C36515311C88218C0031D525 /* CameraPicker.swift in Sources */,
 				C36515391C89042B0031D525 /* GlobalEnums.swift in Sources */,
 				C365152B1C881DA70031D525 /* Extensions.swift in Sources */,
+				C365153C1C8969370031D525 /* userDataSource.swift in Sources */,
 				C36515231C8818F10031D525 /* PhotoCollectionViewCell.swift in Sources */,
 				C36515291C88196D0031D525 /* Preview.swift in Sources */,
 				C365152D1C881E580031D525 /* Selection.swift in Sources */,

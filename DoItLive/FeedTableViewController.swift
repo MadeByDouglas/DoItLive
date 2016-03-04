@@ -7,19 +7,26 @@
 //
 
 import UIKit
+import TwitterKit
 
-class FeedTableViewController: UITableViewController, CameraPickerDelegate {
+class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewControllerDelegate, CameraPickerDelegate {
 
     @IBOutlet weak var logoutBarButton: UIBarButtonItem!
     @IBOutlet weak var newPostBarButton: UIBarButtonItem!
     
     @IBAction func didTapLogout(sender: UIBarButtonItem) {
-        CurrentUser.sharedInstance.session = nil
+        Twitter.sharedInstance().logOut()
         presentLogin()
     }
     
     @IBAction func didTapNewPost(sender: UIBarButtonItem) {
-        showCameraMenu()
+        if let userID = Twitter.sharedInstance().sessionStore.session()?.userID {
+            let composer = TWTRComposerViewController(userID: userID)
+            composer.delegate = self
+            composer.theme = TWTRComposerTheme(themeType: .Dark)
+            presentViewController(composer, animated: true, completion: nil)
+            
+        }
     }
     
     let camera = CameraPicker()
@@ -28,6 +35,9 @@ class FeedTableViewController: UITableViewController, CameraPickerDelegate {
         super.viewDidLoad()
         
         camera.delegate = self
+        
+
+        
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -39,8 +49,14 @@ class FeedTableViewController: UITableViewController, CameraPickerDelegate {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        if CurrentUser.sharedInstance.session == nil {
+        if Twitter.sharedInstance().sessionStore.session() == nil {
             presentLogin()
+        } else {
+            let userID = Twitter.sharedInstance().sessionStore.session()?.userID
+            let client = TWTRAPIClient(userID: userID)
+            let userDataSource = TWTRSearchTimelineDataSource(searchQuery: "#doitlive", APIClient: client)
+            self.dataSource = userDataSource
+            self.showTweetActions = true
         }
     }
     
@@ -50,8 +66,6 @@ class FeedTableViewController: UITableViewController, CameraPickerDelegate {
     }
     
     func implementReceivedImage(image: UIImage) {
-        // TODO: post to twitter
-        print("in \(classForCoder.description()) post to twitter")
         
     }
     
@@ -91,15 +105,15 @@ class FeedTableViewController: UITableViewController, CameraPickerDelegate {
 
     // MARK: - Table view data source
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
-    }
-
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return 0
-    }
+//    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+//        // #warning Incomplete implementation, return the number of sections
+//        return 0
+//    }
+//
+//    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        // #warning Incomplete implementation, return the number of rows
+//        return 0
+//    }
 
     /*
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {

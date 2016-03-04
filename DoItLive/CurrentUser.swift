@@ -9,9 +9,9 @@
 import UIKit
 import TwitterCore
 
-class CurrentUser: NSObject {
-    static let sharedInstance = CurrentUser()
-    
-    var session: TWTRSession!
-    
-}
+//class CurrentUser: NSObject {
+//    static let sharedInstance = CurrentUser()
+//    
+//    var session: TWTRSession!
+//    
+//}
