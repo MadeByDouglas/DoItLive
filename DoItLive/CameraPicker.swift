@@ -17,22 +17,18 @@ protocol CameraPickerDelegate: class {
 class CameraPicker: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     weak var delegate: CameraPickerDelegate? = nil
     
+    // MARK: - ImagePicker
+    
     //confiure imagePicker
-    func configureImagePickerController() -> UIImagePickerController? {
+    func configureImagePickerController() -> UIImagePickerController {
         let imagePicker = UIImagePickerController()
         
         imagePicker.delegate = self
         imagePicker.allowsEditing = false
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.PhotoLibrary) {
             imagePicker.sourceType = UIImagePickerControllerSourceType.PhotoLibrary
-            imagePicker.navigationBar.translucent = false
-            imagePicker.navigationBar.barStyle = UIBarStyle.Black
-            imagePicker.navigationBar.barTintColor = UIColor.redColor()
-            imagePicker.navigationBar.tintColor = UIColor.whiteColor()
-            
-            return imagePicker
         }
-        return nil
+        return imagePicker
     }
     
     //send asset
@@ -50,14 +46,14 @@ class CameraPicker: NSObject, UIImagePickerControllerDelegate, UINavigationContr
 }
 extension  CameraPicker: CameraViewControllerDelegate {
     
+    // MARK: - CameraController
+    
     //configure camera
-    func getCameraVC() -> CameraViewController? {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let cameraVC = storyboard.instantiateViewControllerWithIdentifier("CameraViewController") as? CameraViewController {
-            cameraVC.delegate = self
-            return cameraVC
-        }
-        return nil
+    func getCameraVC() -> CameraViewController {
+        let storyboard = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil)
+        let cameraVC = storyboard.instantiateViewControllerWithIdentifier(ViewControllerID.Camera.rawValue) as! CameraViewController
+        cameraVC.delegate = self
+        return cameraVC
     }
     
     //send asset
@@ -65,7 +61,7 @@ extension  CameraPicker: CameraViewControllerDelegate {
         sendImageForAsset(asset)
     }
     
-    //take asset and get image
+    // MARK: - convert asset to image
     func sendImageForAsset(asset: PHAsset) {
         let options = PHImageRequestOptions()
         options.synchronous = true

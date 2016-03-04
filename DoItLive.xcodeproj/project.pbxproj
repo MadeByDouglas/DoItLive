@@ -22,6 +22,8 @@
 		C365152F1C88201F0031D525 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C365152E1C88201F0031D525 /* Helper.swift */; };
 		C36515311C88218C0031D525 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36515301C88218C0031D525 /* CameraPicker.swift */; };
 		C36515351C8827620031D525 /* FeedTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36515341C8827620031D525 /* FeedTableViewCell.swift */; };
+		C36515371C8903E20031D525 /* CurrentUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36515361C8903E20031D525 /* CurrentUser.swift */; };
+		C36515391C89042B0031D525 /* GlobalEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36515381C89042B0031D525 /* GlobalEnums.swift */; };
 		C3F6F8D71C880C30007376C6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F6F8D61C880C30007376C6 /* AppDelegate.swift */; };
 		C3F6F8E01C880C30007376C6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3F6F8DE1C880C30007376C6 /* Main.storyboard */; };
 		C3F6F8E21C880C30007376C6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F6F8E11C880C30007376C6 /* Assets.xcassets */; };
@@ -44,6 +46,8 @@
 		C365152E1C88201F0031D525 /* Helper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		C36515301C88218C0031D525 /* CameraPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		C36515341C8827620031D525 /* FeedTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeedTableViewCell.swift; sourceTree = "<group>"; };
+		C36515361C8903E20031D525 /* CurrentUser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrentUser.swift; sourceTree = "<group>"; };
+		C36515381C89042B0031D525 /* GlobalEnums.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalEnums.swift; sourceTree = "<group>"; };
 		C3F6F8D31C880C30007376C6 /* DoItLive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoItLive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3F6F8D61C880C30007376C6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C3F6F8DF1C880C30007376C6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -81,11 +85,20 @@
 		C36515331C8823D60031D525 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				C36515381C89042B0031D525 /* GlobalEnums.swift */,
 				C365152A1C881DA70031D525 /* Extensions.swift */,
 				C365152E1C88201F0031D525 /* Helper.swift */,
 				C365152C1C881E580031D525 /* Selection.swift */,
 			);
 			name = Helpers;
+			sourceTree = "<group>";
+		};
+		C365153A1C89046A0031D525 /* Twitter Data */ = {
+			isa = PBXGroup;
+			children = (
+				C36515361C8903E20031D525 /* CurrentUser.swift */,
+			);
+			name = "Twitter Data";
 			sourceTree = "<group>";
 		};
 		C3F6F8CA1C880C2F007376C6 = {
@@ -116,6 +129,7 @@
 				C36515341C8827620031D525 /* FeedTableViewCell.swift */,
 				C365151C1C880FDB0031D525 /* LoginViewController.swift */,
 				C3F6F8DE1C880C30007376C6 /* Main.storyboard */,
+				C365153A1C89046A0031D525 /* Twitter Data */,
 				C36515321C8823AB0031D525 /* Camera */,
 				C36515331C8823D60031D525 /* Helpers */,
 				C3F6F8E11C880C30007376C6 /* Assets.xcassets */,
@@ -219,6 +233,7 @@
 				C365151D1C880FDB0031D525 /* LoginViewController.swift in Sources */,
 				C36515251C88190A0031D525 /* CameraViewController.swift in Sources */,
 				C36515311C88218C0031D525 /* CameraPicker.swift in Sources */,
+				C36515391C89042B0031D525 /* GlobalEnums.swift in Sources */,
 				C365152B1C881DA70031D525 /* Extensions.swift in Sources */,
 				C36515231C8818F10031D525 /* PhotoCollectionViewCell.swift in Sources */,
 				C36515291C88196D0031D525 /* Preview.swift in Sources */,
@@ -226,6 +241,7 @@
 				C365152F1C88201F0031D525 /* Helper.swift in Sources */,
 				C36515211C8818220031D525 /* FeedTableViewController.swift in Sources */,
 				C3F6F8D71C880C30007376C6 /* AppDelegate.swift in Sources */,
+				C36515371C8903E20031D525 /* CurrentUser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

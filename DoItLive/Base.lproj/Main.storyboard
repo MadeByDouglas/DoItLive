@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="4ub-9c-lM8">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="hSM-Zg-914">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
@@ -10,7 +10,7 @@
         <!--Login View Controller-->
         <scene sceneID="wDe-wI-bTO">
             <objects>
-                <viewController id="zQC-vE-M44" customClass="LoginViewController" customModule="DoItLive" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LoginViewController" id="zQC-vE-M44" customClass="LoginViewController" customModule="DoItLive" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="ba4-Ov-FqA"/>
                         <viewControllerLayoutGuide type="bottom" id="8q9-zM-Wy1"/>
@@ -26,10 +26,10 @@
             </objects>
             <point key="canvasLocation" x="1157" y="243"/>
         </scene>
-        <!--Feed Table View Controller-->
+        <!--DO IT LIVE-->
         <scene sceneID="8aw-fF-Eed">
             <objects>
-                <tableViewController id="T6m-96-O5W" customClass="FeedTableViewController" customModule="DoItLive" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="FeedTableViewController" id="T6m-96-O5W" customClass="FeedTableViewController" customModule="DoItLive" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="q6t-KD-VxW">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -49,8 +49,23 @@
                             <outlet property="delegate" destination="T6m-96-O5W" id="2WT-lm-QjL"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="zD7-j1-Tv1"/>
+                    <navigationItem key="navigationItem" title="DO IT LIVE" id="zD7-j1-Tv1">
+                        <barButtonItem key="leftBarButtonItem" title="Logout" id="agk-rC-hcP">
+                            <connections>
+                                <action selector="didTapLogout:" destination="T6m-96-O5W" id="wc1-Gm-kHf"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="goc-18-Q3x">
+                            <connections>
+                                <action selector="didTapNewPost:" destination="T6m-96-O5W" id="2d4-ry-US4"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+                    <connections>
+                        <outlet property="logoutBarButton" destination="agk-rC-hcP" id="W4E-Fq-LpE"/>
+                        <outlet property="newPostBarButton" destination="goc-18-Q3x" id="zmU-lv-Gdn"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RME-gM-kG3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
