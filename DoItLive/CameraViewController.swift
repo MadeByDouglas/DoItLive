@@ -261,7 +261,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
                 if let asset = fetchedImages[indexPath.item] as? PHAsset {
                     cell.representedAssetIdentifier = asset.localIdentifier
                     cell.configureWithAsset(asset)
-                    print("In \(self.classForCoder).cellForItemAtIndexPath, the cell height is \(cell.frame.height.description)")
+//                    print("In \(self.classForCoder).cellForItemAtIndexPath, the cell height is \(cell.frame.height.description)")
                 }
             }
         }
@@ -272,7 +272,6 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         let cell = collectionView.cellForItemAtIndexPath(indexPath)
         if let cell = cell as? PhotoCollectionViewCell {
-            print("selection Mark active")
             self.selectedIndexPath = indexPath
             cell.contentView.layer.sublayers?.last?.hidden = false
             

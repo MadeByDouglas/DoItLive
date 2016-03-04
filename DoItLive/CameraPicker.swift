@@ -61,6 +61,11 @@ extension  CameraPicker: CameraViewControllerDelegate {
         sendImageForAsset(asset)
     }
     
+//    func sendDataForAsset(asset: PHAsset) {
+//        let data = NSData(contentsOfURL: asset.request)
+//
+//    }
+    
     // MARK: - convert asset to image
     func sendImageForAsset(asset: PHAsset) {
         let options = PHImageRequestOptions()

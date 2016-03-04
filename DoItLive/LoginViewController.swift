@@ -16,8 +16,7 @@ class LoginViewController: UIViewController {
 
         let logInButton = TWTRLogInButton { (session, error) in
             if let unwrappedSession = session {
-//                CurrentUser.sharedInstance.session = unwrappedSession
-
+                print(unwrappedSession.userName)
                 self.dismissViewControllerAnimated(true, completion: nil)
             } else {
                 NSLog("In \(self.classForCoder.description()) Login error: %@", error!.localizedDescription);

@@ -8,6 +8,7 @@
 
 import UIKit
 import TwitterKit
+import SwifteriOS
 
 class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewControllerDelegate, CameraPickerDelegate {
 
@@ -20,16 +21,12 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     }
     
     @IBAction func didTapNewPost(sender: UIBarButtonItem) {
-        if let userID = Twitter.sharedInstance().sessionStore.session()?.userID {
-            let composer = TWTRComposerViewController(userID: userID)
-            composer.delegate = self
-            composer.theme = TWTRComposerTheme(themeType: .Dark)
-            presentViewController(composer, animated: true, completion: nil)
-            
-        }
+        showCameraMenu()
     }
     
     let camera = CameraPicker()
+    var swifter: Swifter!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,6 +54,8 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
             let userDataSource = TWTRSearchTimelineDataSource(searchQuery: "#doitlive", APIClient: client)
             self.dataSource = userDataSource
             self.showTweetActions = true
+            
+            self.swifter = Swifter(consumerKey: Twitter.sharedInstance().authConfig.consumerKey, consumerSecret: Twitter.sharedInstance().authConfig.consumerSecret, oauthToken: (Twitter.sharedInstance().sessionStore.session()?.authToken)!, oauthTokenSecret: (Twitter.sharedInstance().sessionStore.session()?.authTokenSecret)!)
         }
     }
     
@@ -66,7 +65,23 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     }
     
     func implementReceivedImage(image: UIImage) {
-        
+        let data = UIImageJPEGRepresentation(image, 0.5)
+        swifter.postStatusUpdate("#doitlive", media: data!)
+//        swifter.postMedia(data!, success: { (status) -> Void in
+//            print("it worked")
+//            }) { (error) -> Void in
+//                print(error.description)
+//        }
+    }
+    
+    func presentCompose() {
+        if let userID = Twitter.sharedInstance().sessionStore.session()?.userID {
+            let composer = TWTRComposerViewController(userID: userID)
+            composer.delegate = self
+            composer.theme = TWTRComposerTheme(themeType: .Dark)
+            presentViewController(composer, animated: true, completion: nil)
+            
+        }
     }
     
     // MARK: - Camera Menu
