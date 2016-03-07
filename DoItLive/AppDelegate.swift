@@ -9,6 +9,7 @@
 import UIKit
 import Fabric
 import TwitterKit
+import SwifteriOS
 
 
 @UIApplicationMain
@@ -16,13 +17,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    var swifter: Swifter!
+
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
 
         Fabric.with([Twitter.self])
+        
+        if Twitter.sharedInstance().sessionStore.session() == nil {
+            //login root
+        } else {
+            //main root
+            
+            //set swifter
+            self.swifter = Swifter(consumerKey: Twitter.sharedInstance().authConfig.consumerKey, consumerSecret: Twitter.sharedInstance().authConfig.consumerSecret, oauthToken: (Twitter.sharedInstance().sessionStore.session()?.authToken)!, oauthTokenSecret: (Twitter.sharedInstance().sessionStore.session()?.authTokenSecret)!)
+        }
 
         return true
+    }
+    
+    func presentLogin() {
+        let loginVC = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.Login.rawValue)
     }
 
     func applicationWillResignActive(application: UIApplication) {

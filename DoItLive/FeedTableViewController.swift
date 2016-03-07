@@ -8,7 +8,6 @@
 
 import UIKit
 import TwitterKit
-import SwifteriOS
 
 class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewControllerDelegate, CameraPickerDelegate {
 
@@ -17,7 +16,7 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     
     @IBAction func didTapLogout(sender: UIBarButtonItem) {
         Twitter.sharedInstance().logOut()
-        presentLogin()
+        //log out notification
     }
     
     @IBAction func didTapNewPost(sender: UIBarButtonItem) {
@@ -25,15 +24,17 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     }
     
     let camera = CameraPicker()
-    var swifter: Swifter!
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         camera.delegate = self
         
-
+        let userID = Twitter.sharedInstance().sessionStore.session()?.userID
+        let client = TWTRAPIClient(userID: userID)
+        let userDataSource = TWTRSearchTimelineDataSource(searchQuery: "#doitlive", APIClient: client)
+        self.dataSource = userDataSource
+        self.showTweetActions = true
         
 
         // Uncomment the following line to preserve selection between presentations
@@ -43,30 +44,10 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
     
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        if Twitter.sharedInstance().sessionStore.session() == nil {
-            presentLogin()
-        } else {
-            let userID = Twitter.sharedInstance().sessionStore.session()?.userID
-            let client = TWTRAPIClient(userID: userID)
-            let userDataSource = TWTRSearchTimelineDataSource(searchQuery: "#doitlive", APIClient: client)
-            self.dataSource = userDataSource
-            self.showTweetActions = true
-            
-            self.swifter = Swifter(consumerKey: Twitter.sharedInstance().authConfig.consumerKey, consumerSecret: Twitter.sharedInstance().authConfig.consumerSecret, oauthToken: (Twitter.sharedInstance().sessionStore.session()?.authToken)!, oauthTokenSecret: (Twitter.sharedInstance().sessionStore.session()?.authTokenSecret)!)
-        }
-    }
-    
-    func presentLogin() {
-        let loginVC = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.Login.rawValue)
-        presentViewController(loginVC, animated: true, completion: nil)
-    }
-    
     func implementReceivedImage(image: UIImage) {
         let data = UIImageJPEGRepresentation(image, 0.5)
-        swifter.postStatusUpdate("#doitlive", media: data!)
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        appDelegate.swifter.postStatusUpdate("#doitlive", media: data!)
 //        swifter.postMedia(data!, success: { (status) -> Void in
 //            print("it worked")
 //            }) { (error) -> Void in
