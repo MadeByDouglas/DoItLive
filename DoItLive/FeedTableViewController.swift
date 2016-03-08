@@ -44,10 +44,10 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
     
-    func implementReceivedImage(image: UIImage) {
+    func implementReceivedImageAndText(image: UIImage, text: String) {
         let data = UIImageJPEGRepresentation(image, 0.5)
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        appDelegate.swifter.postStatusUpdate("#doitlive", media: data!)
+        appDelegate.swifter.postStatusUpdate(text, media: data!)
 //        swifter.postMedia(data!, success: { (status) -> Void in
 //            print("it worked")
 //            }) { (error) -> Void in

@@ -103,7 +103,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" id="iq4-W8-kDA" userLabel="Image Preview View" customClass="Preview" customModule="DoItLive" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="44" width="320" height="427"/>
+                                <rect key="frame" x="0.0" y="141" width="320" height="427"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="iq4-W8-kDA" secondAttribute="height" multiplier="3:4" id="4aY-Dn-e0O"/>
@@ -128,41 +128,50 @@
                                     <action selector="didTapResume:" destination="4ub-9c-lM8" eventType="touchUpInside" id="au9-9B-GUW"/>
                                 </connections>
                             </button>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tfS-DL-LjQ" userLabel="Red Bar View">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tfS-DL-LjQ" userLabel="Post View">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="141"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cOB-0c-mlq">
-                                        <rect key="frame" x="241" y="4" width="55" height="36"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                        <state key="normal" title="DONE">
-                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                        </state>
-                                        <connections>
-                                            <action selector="didTapDone:" destination="4ub-9c-lM8" eventType="touchUpInside" id="nHv-KA-vvY"/>
-                                        </connections>
-                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S45-xA-icv">
-                                        <rect key="frame" x="24" y="4" width="78" height="36"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                        <state key="normal" title="CANCEL">
+                                        <rect key="frame" x="8" y="8" width="41" height="33"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <state key="normal" title="FEED">
                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
                                         <connections>
-                                            <action selector="didTapCancel:" destination="4ub-9c-lM8" eventType="touchUpInside" id="iJh-WV-W7P"/>
+                                            <action selector="didTapFeed:" destination="4ub-9c-lM8" eventType="touchUpInside" id="NKP-C7-8Uh"/>
                                         </connections>
                                     </button>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="#doitlive" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Kv2-e0-hM2">
+                                        <rect key="frame" x="8" y="49" width="304" height="92"/>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences" keyboardType="twitter" keyboardAppearance="alert" enablesReturnKeyAutomatically="YES"/>
+                                        <connections>
+                                            <outlet property="delegate" destination="4ub-9c-lM8" id="RNV-pr-luH"/>
+                                        </connections>
+                                    </textView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstItem="S45-xA-icv" firstAttribute="leading" secondItem="tfS-DL-LjQ" secondAttribute="leading" constant="24" id="KCo-5N-jpz"/>
+                                    <constraint firstAttribute="trailing" secondItem="Kv2-e0-hM2" secondAttribute="trailing" constant="8" id="0oL-CV-Wbf"/>
+                                    <constraint firstItem="S45-xA-icv" firstAttribute="leading" secondItem="tfS-DL-LjQ" secondAttribute="leading" constant="8" id="KCo-5N-jpz"/>
+                                    <constraint firstItem="S45-xA-icv" firstAttribute="top" secondItem="tfS-DL-LjQ" secondAttribute="top" constant="8" id="Yue-qg-PZl"/>
+                                    <constraint firstItem="Kv2-e0-hM2" firstAttribute="leading" secondItem="tfS-DL-LjQ" secondAttribute="leading" constant="8" id="bGI-o0-6cF"/>
                                     <constraint firstAttribute="height" constant="44" id="cd0-Bf-NZQ"/>
-                                    <constraint firstAttribute="trailing" secondItem="cOB-0c-mlq" secondAttribute="trailing" constant="24" id="py8-UQ-e4v"/>
                                     <constraint firstItem="S45-xA-icv" firstAttribute="centerY" secondItem="tfS-DL-LjQ" secondAttribute="centerY" id="qyH-ja-VLU"/>
-                                    <constraint firstItem="cOB-0c-mlq" firstAttribute="centerY" secondItem="tfS-DL-LjQ" secondAttribute="centerY" id="yQp-Xw-qe4"/>
+                                    <constraint firstAttribute="bottom" secondItem="Kv2-e0-hM2" secondAttribute="bottom" id="uFe-To-8qR"/>
+                                    <constraint firstItem="Kv2-e0-hM2" firstAttribute="top" secondItem="S45-xA-icv" secondAttribute="bottom" constant="8" id="xUH-uP-f32"/>
                                 </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="cd0-Bf-NZQ"/>
+                                        <exclude reference="qyH-ja-VLU"/>
+                                    </mask>
+                                </variation>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7Tb-Rc-kHo" userLabel="Camera Controls View">
-                                <rect key="frame" x="0.0" y="405" width="320" height="66"/>
+                                <rect key="frame" x="0.0" y="502" width="320" height="66"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kay-lE-Kcd" userLabel="Switch Button">
                                         <rect key="frame" x="236" y="17" width="38" height="32"/>
@@ -204,64 +213,6 @@
                                     <constraint firstItem="Kay-lE-Kcd" firstAttribute="leading" secondItem="K1e-vh-XQ7" secondAttribute="trailing" constant="45" id="yI0-Cj-FTQ"/>
                                 </constraints>
                             </view>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="yux-GA-RbX">
-                                <rect key="frame" x="0.0" y="471" width="320" height="97"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="2" minimumInteritemSpacing="0.0" id="f3Y-qZ-5xG">
-                                    <size key="itemSize" width="97" height="97"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                </collectionViewFlowLayout>
-                                <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="PhotoCollectionViewCell" id="2jJ-K4-tmT" customClass="PhotoCollectionViewCell" customModule="DoItLive" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="97" height="97"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="97" height="97"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="flB-WH-jzM" userLabel="Image Cell View">
-                                                    <rect key="frame" x="0.0" y="0.0" width="97" height="97"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" secondItem="flB-WH-jzM" secondAttribute="height" multiplier="1:1" id="1C1-n0-zMz"/>
-                                                        <constraint firstAttribute="width" secondItem="flB-WH-jzM" secondAttribute="height" multiplier="1:1" id="Xbl-SL-ccV"/>
-                                                    </constraints>
-                                                    <variation key="default">
-                                                        <mask key="constraints">
-                                                            <exclude reference="1C1-n0-zMz"/>
-                                                        </mask>
-                                                    </variation>
-                                                </imageView>
-                                            </subviews>
-                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                                        </view>
-                                        <constraints>
-                                            <constraint firstItem="flB-WH-jzM" firstAttribute="leading" secondItem="2jJ-K4-tmT" secondAttribute="leading" id="4XH-pL-OAb"/>
-                                            <constraint firstItem="flB-WH-jzM" firstAttribute="leading" secondItem="2jJ-K4-tmT" secondAttribute="leading" id="UNl-26-Kq3"/>
-                                            <constraint firstItem="flB-WH-jzM" firstAttribute="top" secondItem="2jJ-K4-tmT" secondAttribute="top" id="bFO-Jb-CoY"/>
-                                            <constraint firstAttribute="trailing" secondItem="flB-WH-jzM" secondAttribute="trailing" id="cP0-pv-42e"/>
-                                            <constraint firstAttribute="trailing" secondItem="flB-WH-jzM" secondAttribute="trailing" id="fOg-02-0pK"/>
-                                            <constraint firstItem="flB-WH-jzM" firstAttribute="top" secondItem="2jJ-K4-tmT" secondAttribute="top" id="xjr-nc-3oj"/>
-                                            <constraint firstAttribute="bottom" secondItem="flB-WH-jzM" secondAttribute="bottom" id="zsP-xJ-5dA"/>
-                                        </constraints>
-                                        <variation key="default">
-                                            <mask key="constraints">
-                                                <exclude reference="UNl-26-Kq3"/>
-                                                <exclude reference="bFO-Jb-CoY"/>
-                                                <exclude reference="fOg-02-0pK"/>
-                                                <exclude reference="zsP-xJ-5dA"/>
-                                            </mask>
-                                        </variation>
-                                        <connections>
-                                            <outlet property="imageCellView" destination="flB-WH-jzM" id="n32-Oc-pi4"/>
-                                        </connections>
-                                    </collectionViewCell>
-                                </cells>
-                                <connections>
-                                    <outlet property="dataSource" destination="4ub-9c-lM8" id="zmT-am-ZXG"/>
-                                    <outlet property="delegate" destination="4ub-9c-lM8" id="hPp-is-8U5"/>
-                                </connections>
-                            </collectionView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -269,31 +220,33 @@
                             <constraint firstItem="qfM-2O-I84" firstAttribute="centerY" secondItem="SdL-7N-qx7" secondAttribute="centerY" id="1RU-l6-PgX"/>
                             <constraint firstItem="7Tb-Rc-kHo" firstAttribute="leading" secondItem="SdL-7N-qx7" secondAttribute="leading" id="1j0-33-0NR"/>
                             <constraint firstAttribute="trailing" secondItem="iq4-W8-kDA" secondAttribute="trailing" id="6nS-NE-03q"/>
+                            <constraint firstItem="7Tb-Rc-kHo" firstAttribute="bottom" secondItem="iq4-W8-kDA" secondAttribute="bottom" id="FeO-Oj-8OR"/>
                             <constraint firstItem="iq4-W8-kDA" firstAttribute="leading" secondItem="SdL-7N-qx7" secondAttribute="leading" id="GvC-ae-hJf"/>
                             <constraint firstItem="tfS-DL-LjQ" firstAttribute="leading" secondItem="SdL-7N-qx7" secondAttribute="leading" id="HuU-bG-CNh"/>
-                            <constraint firstItem="yux-GA-RbX" firstAttribute="top" secondItem="7Tb-Rc-kHo" secondAttribute="bottom" id="M1w-L9-vEY"/>
-                            <constraint firstAttribute="trailing" secondItem="yux-GA-RbX" secondAttribute="trailing" id="QcQ-ii-Zrm"/>
-                            <constraint firstItem="yux-GA-RbX" firstAttribute="top" secondItem="iq4-W8-kDA" secondAttribute="bottom" id="VH5-1B-H6I"/>
                             <constraint firstAttribute="trailing" secondItem="tfS-DL-LjQ" secondAttribute="trailing" id="YPf-jS-NwS"/>
+                            <constraint firstItem="iq4-W8-kDA" firstAttribute="top" secondItem="tfS-DL-LjQ" secondAttribute="bottom" id="Ykj-Je-h45"/>
                             <constraint firstItem="99P-Bn-1jD" firstAttribute="centerX" secondItem="SdL-7N-qx7" secondAttribute="centerX" id="d78-fQ-eeD"/>
+                            <constraint firstItem="abl-Lf-6NI" firstAttribute="top" secondItem="iq4-W8-kDA" secondAttribute="bottom" id="eet-vV-o0r"/>
                             <constraint firstItem="qfM-2O-I84" firstAttribute="centerX" secondItem="SdL-7N-qx7" secondAttribute="centerX" id="hvJ-bI-Nnb"/>
-                            <constraint firstItem="yux-GA-RbX" firstAttribute="leading" secondItem="SdL-7N-qx7" secondAttribute="leading" id="jyF-rL-WB6"/>
                             <constraint firstItem="iq4-W8-kDA" firstAttribute="top" secondItem="tfS-DL-LjQ" secondAttribute="bottom" id="mqd-0L-Yvx"/>
                             <constraint firstItem="tfS-DL-LjQ" firstAttribute="top" secondItem="SdL-7N-qx7" secondAttribute="topMargin" id="r20-2M-xbw"/>
-                            <constraint firstItem="abl-Lf-6NI" firstAttribute="top" secondItem="yux-GA-RbX" secondAttribute="bottom" id="tkB-yP-qr7"/>
                             <constraint firstItem="99P-Bn-1jD" firstAttribute="centerY" secondItem="SdL-7N-qx7" secondAttribute="centerY" constant="-50" id="woZ-kN-Yh0"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="mqd-0L-Yvx"/>
+                            </mask>
+                        </variation>
                     </view>
                     <nil key="simulatedStatusBarMetrics"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
                         <outlet property="cameraUnavailableLabel" destination="99P-Bn-1jD" id="Thc-fi-WIg"/>
-                        <outlet property="cancelButton" destination="S45-xA-icv" id="idU-Hn-mRB"/>
-                        <outlet property="doneButton" destination="cOB-0c-mlq" id="qYq-IK-ypl"/>
+                        <outlet property="feedButton" destination="S45-xA-icv" id="d3U-a3-6iq"/>
                         <outlet property="isInstantSwitch" destination="cJT-gB-nlz" id="9Dw-ZC-E22"/>
-                        <outlet property="pictureCollectionView" destination="yux-GA-RbX" id="T22-Rd-XvH"/>
+                        <outlet property="postTextView" destination="Kv2-e0-hM2" id="92L-wI-r8x"/>
+                        <outlet property="postView" destination="tfS-DL-LjQ" id="7oY-nZ-T23"/>
                         <outlet property="previewView" destination="iq4-W8-kDA" id="k4z-7r-K67"/>
-                        <outlet property="redBar" destination="tfS-DL-LjQ" id="wXT-bV-zQV"/>
                         <outlet property="resumeButton" destination="qfM-2O-I84" id="9x5-7D-18V"/>
                         <outlet property="shutterButton" destination="K1e-vh-XQ7" id="due-yW-Kew"/>
                         <outlet property="switchButton" destination="Kay-lE-Kcd" id="DsH-v9-5fp"/>

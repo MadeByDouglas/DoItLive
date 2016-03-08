@@ -24,19 +24,19 @@ private enum AVCamSetupResult: Int {
 }
 
 protocol CameraViewControllerDelegate: class {
-    func cameraControllerDidSendAsset(controller: CameraViewController, asset: PHAsset)
+    func cameraControllerDidSendAssetAndTweet(controller: CameraViewController, asset: PHAsset, tweet: String)
 }
 
-class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDelegate,*/ UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, PHPhotoLibraryChangeObserver {
+class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDelegate,*/ UITextViewDelegate, PHPhotoLibraryChangeObserver {
 
     weak var delegate: CameraViewControllerDelegate?
     
-    @IBOutlet weak var redBar: UIView!
+    @IBOutlet weak var postView: UIView!
     @IBOutlet weak var previewView: Preview!
     
-    @IBOutlet weak var cancelButton: UIButton!
-    @IBOutlet weak var doneButton: UIButton!
+    @IBOutlet weak var feedButton: UIButton!
     
+    @IBOutlet weak var postTextView: UITextView!
     @IBOutlet weak var isInstantSwitch: UISwitch!
     
     @IBOutlet weak var shutterButton: UIButton!
@@ -69,17 +69,13 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     // Photos
     var photosData = Photos()
     
-    // CollectionView Variables
-    @IBOutlet weak var pictureCollectionView: UICollectionView!
-    
-    var selectedIndexPath: NSIndexPath? = nil
-    
     
     
     //MARK: Loading View
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        postTextView.delegate = self
         
         newPhotoReady = false
         
@@ -100,36 +96,21 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         
         didSendPhoto = false
         activateCamera()
-        
-        // Photos
-        // Determine the size of the thumbnails to request from the PHCachingImageManager
-        let scale = UIScreen.mainScreen().scale
-        Photos.AssetGridThumbnailSize = CGSizeMake(self.pictureCollectionView.frame.height * scale, self.pictureCollectionView.frame.height * scale)
-        //        print("the asset thumbnail height is \(RVPhotosDataSource.AssetGridThumbnailSize.height.description)")
-        //        print("the collectionView height is \(self.pictureCollectionView.frame.height.description)")
         authorizePhotos()
+    
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         blurPreview(false)
         
-        // Begin caching assets in and around collection view's visible rect.
-        if PHPhotoLibrary.authorizationStatus() == .Authorized {
-            photosData.updateCachedAssetsForCollectionView(self.pictureCollectionView, view: self.view, isLoaded: self.isViewLoaded())
-        }
     }
     
     //MARK: Unloading View
     
     override func viewWillDisappear(animated: Bool) {
         blurPreview(true)
-        //reset selection
-        if let indexPath = self.selectedIndexPath {
-            self.pictureCollectionView?.cellForItemAtIndexPath(indexPath)?.selected = false
-            self.pictureCollectionView?.reloadItemsAtIndexPaths([indexPath])
-            self.selectedIndexPath = nil
-        }
+
         super.viewWillDisappear(animated)
     }
     
@@ -176,53 +157,10 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         switchCameras()
     }
     
-    @IBAction func didTapCancel(sender: UIButton) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func didTapFeed(sender: UIButton) {
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    @IBAction func didTapDone(sender: UIButton) {
-        if didSendPhoto == true {
-            if let indexPath = self.selectedIndexPath {
-                if let fetchedImages = photosData.assetsFetchResults {
-                    if let asset = fetchedImages[indexPath.item] as? PHAsset {
-                        //print("In \(self.classForCoder).didTapDone didSendPhoto is true, sending asset to Camera controller")
-                        self.delegate?.cameraControllerDidSendAsset(self, asset: asset)
-                        dismissViewControllerAnimated(true, completion: nil)
-                    } else {
-                        print("In \(self.classForCoder).didTapDone, didSendPhoto is true; no asset")
-                    }
-                } else {
-                    print("In \(self.classForCoder).didTapDone, Did send Photo is true, no fetched Image")
-                }
-            } else {
-                print("In \(self.classForCoder).didTapDone DiD send photo is true no selectedIndex Path")
-                dismissViewControllerAnimated(true, completion: nil)
-            }
-        } else {
-            if let indexPath = self.selectedIndexPath {
-                if let fetchedImages = photosData.assetsFetchResults {
-                    if let asset = fetchedImages[indexPath.item] as? PHAsset {
-                        // print("In \(self.classForCoder).didTapDone didSendPhoto is false, sending asset to Camera controller")
-                        self.delegate?.cameraControllerDidSendAsset(self, asset: asset)
-                        dismissViewControllerAnimated(true, completion: nil)
-                    } else {
-                        print("In \(self.classForCoder).didTapDone, didSendPhoto is flase; no asset")
-                    }
-                } else {
-                    print("In \(self.classForCoder).didTapDone, didSendPhoto is false; no fetched Image")
-                }
-            } else {
-                dispatch_async(dispatch_get_main_queue()) {
-                    let message = NSLocalizedString("Tap on a thumbnail below and you'll be all set", comment: "Explain how to select photo")
-                    let alertController = UIAlertController(title: "No Photo Selected", message: message, preferredStyle: UIAlertControllerStyle.Alert)
-                    let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: UIAlertActionStyle.Cancel, handler: nil)
-                    alertController.addAction(cancelAction)
-                    self.presentViewController(alertController, animated: true, completion: nil)
-                }
-            }
-        }
-        
-    }
     
     @IBAction func didTapResume(sender: UIButton) {
         resumeSession()
@@ -246,55 +184,12 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         }
     }
     
-    // MARK: - CollectionView
-    
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // print("number of collection view items is \(photosData.numberOfItems().description)")
-        return photosData.numberOfItems()
-    }
-    
-    
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(PhotoCollectionViewCell.identifier, forIndexPath: indexPath)
-        if let cell = cell as? PhotoCollectionViewCell {
-            if let fetchedImages = photosData.assetsFetchResults {
-                if let asset = fetchedImages[indexPath.item] as? PHAsset {
-                    cell.representedAssetIdentifier = asset.localIdentifier
-                    cell.configureWithAsset(asset)
-//                    print("In \(self.classForCoder).cellForItemAtIndexPath, the cell height is \(cell.frame.height.description)")
-                }
-            }
-        }
-        return cell
-    }
-    
-    
-    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        let cell = collectionView.cellForItemAtIndexPath(indexPath)
-        if let cell = cell as? PhotoCollectionViewCell {
-            self.selectedIndexPath = indexPath
-            cell.contentView.layer.sublayers?.last?.hidden = false
-            
-        } else {
-            print("no cell")
-        }
-    }
-    
-    func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
-        let cell = collectionView.cellForItemAtIndexPath(indexPath)
-        if let cell = cell as? PhotoCollectionViewCell {
-            cell.contentView.layer.sublayers?.last?.hidden = true
-        }
-    }
-    
-    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        let availableHeight = self.view.frame.height - self.previewView.frame.height - self.redBar.frame.height
-        //        print("Dear Douglas. You are going to drive us all crazy without including information about the source of each print statement. I've added: ...\(self.classForCoder).sizeForItemAtIndexPath....\n to this statement. Please do so with all of yours. frame height \(self.view.frame.height.description) preview height \(self.previewView.frame.height.description) redbar height \(self.redBar.frame.height.description) ")
-        let size = CGSizeMake(availableHeight, availableHeight)
-        return size
-    }
-    
     // MARK: - PHPhotoLibraryChangeObserver
+    
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        self.view.endEditing(true)
+        super.touchesBegan(touches, withEvent: event)
+    }
     
     func photoLibraryDidChange(changeInstance: PHChange) {
         // Check if there are changes to the assets we are showing.
@@ -307,90 +202,17 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         if self.isInstantSwitch.on && self.newPhotoReady == true {
             
             if let asset = collectionChanges.fetchResultAfterChanges[0] as? PHAsset {
-                self.delegate?.cameraControllerDidSendAsset(self, asset: asset)
+                self.delegate?.cameraControllerDidSendAssetAndTweet(self, asset: asset, tweet: self.postTextView.text)
                 self.newPhotoReady = false
                 self.didSendPhoto = true
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.postTextView.text.removeAll()
+                    self.postTextView.text = "#doitlive"
+                }
             }
         }
         
-        /*
-        Change notifications may be made on a background queue. Re-dispatch to the
-        main queue before acting on the change as we'll be updating the UI.
-        */
-        dispatch_async(dispatch_get_main_queue()) {
-            //reset selection
-            if let indexPath = self.selectedIndexPath {
-                self.pictureCollectionView?.cellForItemAtIndexPath(indexPath)?.selected = false
-                self.pictureCollectionView?.reloadItemsAtIndexPaths([indexPath])
-                self.selectedIndexPath = nil
-            }
-            
-            
-            
-            let collectionView = self.pictureCollectionView!
-            let lastItem = self.photosData.fetchLimit
-            
-            // Reload the collection view if the incremental diffs are not available or iOS 8 which checks entire libary and sees large changes to prevent collectionView from trying to make all the incremental changes
-            if !collectionChanges.hasIncrementalChanges || collectionChanges.hasMoves || collectionChanges.removedIndexes?.count >= self.photosData.fetchLimit || collectionChanges.insertedIndexes?.count >= self.photosData.fetchLimit {
-                // Get the new fetch result.
-                self.photosData.assetsFetchResults = collectionChanges.fetchResultAfterChanges
-                collectionView.reloadData()
-                
-            } else {
-                /*
-                Tell the collection view to animate insertions and deletions if we
-                have incremental diffs.
-                */
-                collectionView.performBatchUpdates({
-                    if let removedIndexes = collectionChanges.removedIndexes
-                        where removedIndexes.count > 0 {
-                            // Get the new fetch result.
-                            self.photosData.assetsFetchResults = collectionChanges.fetchResultAfterChanges
-                            
-                            
-                            let lastIndexes = NSIndexSet(indexesInRange: NSMakeRange(lastItem - removedIndexes.count, removedIndexes.count))
-                            
-                            collectionView.deleteItemsAtIndexPaths(removedIndexes.aapl_indexPathsFromIndexesWithSection(0))
-                            // only balance out the collectionView if there are more than 10 items in fetchResult
-                            if collectionChanges.fetchResultAfterChanges.count > self.photosData.fetchLimit {
-                                collectionView.insertItemsAtIndexPaths(lastIndexes.aapl_indexPathsFromIndexesWithSection(0))
-                            }
-                    }
-                    
-                    if let insertedIndexes = collectionChanges.insertedIndexes
-                        where insertedIndexes.count > 0 {
-                            // Get the new fetch result.
-                            self.photosData.assetsFetchResults = collectionChanges.fetchResultAfterChanges
-                            
-                            let lastIndexes = NSIndexSet(indexesInRange: NSMakeRange(lastItem - insertedIndexes.count, insertedIndexes.count))
-                            
-                            // only balance out the collectionView if there are more than 10 items in fetchResult
-                            if collectionChanges.fetchResultAfterChanges.count > self.photosData.fetchLimit {
-                                collectionView.deleteItemsAtIndexPaths(lastIndexes.aapl_indexPathsFromIndexesWithSection(0))
-                            }
-                            collectionView.insertItemsAtIndexPaths(insertedIndexes.aapl_indexPathsFromIndexesWithSection(0))
-                    }
-                    
-                    // Causes problems with iOS 8
-                    
-                    //                    if let changedIndexes = collectionChanges.changedIndexes
-                    //                        where changedIndexes.count > 0 {
-                    //                            // Get the new fetch result.
-                    //                            self.photosData.assetsFetchResults = collectionChanges.fetchResultAfterChanges
-                    //
-                    //                            let safeIndexes = NSMutableIndexSet()
-                    //                            changedIndexes.enumerateIndexesUsingBlock({ (index, stop) -> Void in
-                    //                                if index != removeIndex {
-                    //                                    safeIndexes.addIndex(index)
-                    //                                }
-                    //                            })
-                    //                            collectionView.reloadItemsAtIndexPaths(safeIndexes.aapl_indexPathsFromIndexesWithSection(0))
-                    //                    }
-                    }, completion: nil)
-            }
-            
-            //            self.resetCachedAssets() //causes the empty cells
-        }
+        
     }
     
 }
@@ -407,10 +229,7 @@ extension CameraViewController {
         // Only enable the ability to change camera if the device has more than one camera.
         switchButton.enabled = sender && (AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo).count > 1)
         isInstantSwitch.enabled = sender
-        doneButton.enabled = sender
         
-        // photos UI
-        self.pictureCollectionView.allowsSelection = sender
     }
     
     func setupAnimations() {
@@ -622,11 +441,7 @@ extension CameraViewController {
                 if status == PHAuthorizationStatus.Authorized {
                     
                     self.photosData.setupPhotos()
-                    self.photosData.updateCachedAssetsForCollectionView(self.pictureCollectionView, view: self.view, isLoaded: self.isViewLoaded())
-                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                        self.pictureCollectionView.reloadData()
-                        self.enableUI(true)
-                    })
+                    
                 } else {
                     // call method again to check and use denied / restricted messages we already have made
                     self.authorizePhotos()
@@ -653,7 +468,7 @@ extension CameraViewController {
     func showCameraFailMessage() {
         dispatch_async(dispatch_get_main_queue()) {
             let message = NSLocalizedString("Unable to capture media", comment: "Alert message when something goes wrong during capture session configuration")
-            let alertController = UIAlertController(title: "Do It Live", message: message, preferredStyle: UIAlertControllerStyle.Alert)
+            let alertController = UIAlertController(title: App.Name.rawValue, message: message, preferredStyle: UIAlertControllerStyle.Alert)
             let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: UIAlertActionStyle.Cancel, handler: nil)
             alertController.addAction(cancelAction)
             self.presentViewController(alertController, animated: true, completion: nil)

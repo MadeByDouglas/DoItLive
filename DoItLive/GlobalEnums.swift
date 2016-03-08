@@ -23,3 +23,7 @@ enum Notify: String {
     case Login = "Login"
     case Logout = "Logout"
 }
+
+enum App: String {
+    case Name = "Do It Live"
+}

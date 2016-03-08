@@ -11,7 +11,7 @@ import Photos
 import PhotosUI
 
 protocol CameraPickerDelegate: class {
-    func implementReceivedImage(image: UIImage)
+    func implementReceivedImageAndText(image: UIImage, text: String)
 }
 
 class CameraPicker: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -35,7 +35,7 @@ class CameraPicker: NSObject, UIImagePickerControllerDelegate, UINavigationContr
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
         if let url = info[UIImagePickerControllerReferenceURL] as? NSURL {
             if let asset = PHAsset.fetchAssetsWithALAssetURLs([url], options: nil).lastObject as? PHAsset {
-                sendImageForAsset(asset)
+                sendImageForAssetAndTweet(asset, tweet: "#doitlive")
                 picker.dismissViewControllerAnimated(true, completion: nil)
             }
         } else {
@@ -57,9 +57,10 @@ extension  CameraPicker: CameraViewControllerDelegate {
     }
     
     //send asset
-    func cameraControllerDidSendAsset(controller: CameraViewController, asset: PHAsset) {
-        sendImageForAsset(asset)
+    func cameraControllerDidSendAssetAndTweet(controller: CameraViewController, asset: PHAsset, tweet: String) {
+        sendImageForAssetAndTweet(asset, tweet: tweet)
     }
+
     
 //    func sendDataForAsset(asset: PHAsset) {
 //        let data = NSData(contentsOfURL: asset.request)
@@ -67,7 +68,7 @@ extension  CameraPicker: CameraViewControllerDelegate {
 //    }
     
     // MARK: - convert asset to image
-    func sendImageForAsset(asset: PHAsset) {
+    func sendImageForAssetAndTweet(asset: PHAsset, tweet: String) {
         let options = PHImageRequestOptions()
         options.synchronous = true
         options.resizeMode = PHImageRequestOptionsResizeMode.Exact
@@ -77,7 +78,7 @@ extension  CameraPicker: CameraViewControllerDelegate {
                     //print("In \(self.classForCoder).sendImageForAsset asset width: \(asset.getAdjustedSize(RVConstants.PhotoSize.Rendevu.value).width) asset height: \(asset.getAdjustedSize(RVConstants.PhotoSize.Rendevu.value).height)")
                     // print("In \(self.classForCoder).image width: \(image.size.width) image height: \(image.size.height)")
                     if let delegate = self.delegate {
-                        delegate.implementReceivedImage(image)
+                        delegate.implementReceivedImageAndText(image, text: tweet)
                     }
                 } else {
                     print("In \(self.classForCoder).sendImageForAsset... failed to fetch image")
