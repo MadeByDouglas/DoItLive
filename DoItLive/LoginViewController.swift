@@ -17,7 +17,7 @@ class LoginViewController: UIViewController {
         let logInButton = TWTRLogInButton { (session, error) in
             if let unwrappedSession = session {
                 //log in notification
-                self.dismissViewControllerAnimated(true, completion: nil)
+                NSNotificationCenter.defaultCenter().postNotificationName(Notify.Login.rawValue, object: unwrappedSession)
             } else {
                 NSLog("In \(self.classForCoder.description()) Login error: %@", error!.localizedDescription);
             }

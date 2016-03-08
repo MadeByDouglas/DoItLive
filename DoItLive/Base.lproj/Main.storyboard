@@ -74,7 +74,7 @@
         <!--Navigation Controller-->
         <scene sceneID="y20-pN-oYP">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="hSM-Zg-914" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="FeedNavController" automaticallyAdjustsScrollViewInsets="NO" id="hSM-Zg-914" sceneMemberID="viewController">
                     <toolbarItems/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="Xc1-OS-IZc">
@@ -246,10 +246,10 @@
                                         </constraints>
                                         <variation key="default">
                                             <mask key="constraints">
-                                                <exclude reference="zsP-xJ-5dA"/>
-                                                <exclude reference="bFO-Jb-CoY"/>
                                                 <exclude reference="UNl-26-Kq3"/>
+                                                <exclude reference="bFO-Jb-CoY"/>
                                                 <exclude reference="fOg-02-0pK"/>
+                                                <exclude reference="zsP-xJ-5dA"/>
                                             </mask>
                                         </variation>
                                         <connections>

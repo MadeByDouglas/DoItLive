@@ -13,7 +13,13 @@ enum StoryboardID: String {
 }
 
 enum ViewControllerID: String {
+    case NavFeed = "FeedNavController"
     case Feed = "FeedTableViewController"
     case Login = "LoginViewController"
     case Camera = "CameraViewController"
+}
+
+enum Notify: String {
+    case Login = "Login"
+    case Logout = "Logout"
 }

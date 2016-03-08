@@ -25,20 +25,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Fabric.with([Twitter.self])
         
-        if Twitter.sharedInstance().sessionStore.session() == nil {
-            //login root
-        } else {
-            //main root
-            
-            //set swifter
-            self.swifter = Swifter(consumerKey: Twitter.sharedInstance().authConfig.consumerKey, consumerSecret: Twitter.sharedInstance().authConfig.consumerSecret, oauthToken: (Twitter.sharedInstance().sessionStore.session()?.authToken)!, oauthTokenSecret: (Twitter.sharedInstance().sessionStore.session()?.authTokenSecret)!)
+        NSNotificationCenter.defaultCenter().addObserverForName(Notify.Login.rawValue, object: nil, queue: nil) { (notification) -> Void in
+            self.appLogin()
         }
+        
+        NSNotificationCenter.defaultCenter().addObserverForName(Notify.Logout.rawValue, object: nil, queue: nil) { (notification) -> Void in
+            self.appLogout()
+        }
+        
+        handleAuth()
 
         return true
     }
     
-    func presentLogin() {
-        let loginVC = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.Login.rawValue)
+    func appLogin() {
+        handleAuth()
+    }
+    
+    func appLogout() {
+        Twitter.sharedInstance().logOut()
+        handleAuth()
+    }
+    
+    func handleAuth() {
+        if Twitter.sharedInstance().sessionStore.session() == nil {
+            //login root
+            window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.Login.rawValue)
+        } else {
+            //main root
+            window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.NavFeed.rawValue)
+            
+            //set swifter
+            self.swifter = Swifter(consumerKey: Twitter.sharedInstance().authConfig.consumerKey, consumerSecret: Twitter.sharedInstance().authConfig.consumerSecret, oauthToken: (Twitter.sharedInstance().sessionStore.session()?.authToken)!, oauthTokenSecret: (Twitter.sharedInstance().sessionStore.session()?.authTokenSecret)!)
+        }
     }
 
     func applicationWillResignActive(application: UIApplication) {

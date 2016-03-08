@@ -15,8 +15,8 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     @IBOutlet weak var newPostBarButton: UIBarButtonItem!
     
     @IBAction func didTapLogout(sender: UIBarButtonItem) {
-        Twitter.sharedInstance().logOut()
         //log out notification
+        NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
     }
     
     @IBAction func didTapNewPost(sender: UIBarButtonItem) {
@@ -53,16 +53,6 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
 //            }) { (error) -> Void in
 //                print(error.description)
 //        }
-    }
-    
-    func presentCompose() {
-        if let userID = Twitter.sharedInstance().sessionStore.session()?.userID {
-            let composer = TWTRComposerViewController(userID: userID)
-            composer.delegate = self
-            composer.theme = TWTRComposerTheme(themeType: .Dark)
-            presentViewController(composer, animated: true, completion: nil)
-            
-        }
     }
     
     // MARK: - Camera Menu
