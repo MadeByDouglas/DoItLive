@@ -57,6 +57,16 @@ class Helper: NSObject {
         return "Can't use '\(character)'"
     }
     
+    static func isValidTweetWithErrors(existingText: String?, possibleNewCharacter: String) -> String? {
+        if let text = existingText {
+            
+            if (text.characters.count + possibleNewCharacter.characters.count) > 140 {
+                return "Tweet is too long"
+            }
+        }
+        return nil
+    }
+    
     static func cellsFitAcrossScreen(numberOfCells: Int, labelHeight: CGFloat, itemSpacing: CGFloat, sectionInsetLeft: CGFloat, sectionInsetRight: CGFloat) -> CGSize {
         //using hardwired info get proper spacing for cells across entire screen
         let insideMargin = itemSpacing

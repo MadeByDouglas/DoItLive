@@ -37,7 +37,6 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     @IBOutlet weak var feedButton: UIButton!
     
     @IBOutlet weak var postTextView: UITextView!
-    @IBOutlet weak var isInstantSwitch: UISwitch!
     
     @IBOutlet weak var shutterButton: UIButton!
     @IBOutlet weak var switchButton: UIButton!
@@ -158,6 +157,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     }
     
     @IBAction func didTapFeed(sender: UIButton) {
+        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
@@ -185,12 +185,6 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     }
     
     // MARK: - PHPhotoLibraryChangeObserver
-    
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        self.view.endEditing(true)
-        super.touchesBegan(touches, withEvent: event)
-    }
-    
     func photoLibraryDidChange(changeInstance: PHChange) {
         // Check if there are changes to the assets we are showing.
         guard let
@@ -199,7 +193,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
             else {return}
         
         //Instant publish
-        if self.isInstantSwitch.on && self.newPhotoReady == true {
+        if self.newPhotoReady == true {
             
             if let asset = collectionChanges.fetchResultAfterChanges[0] as? PHAsset {
                 self.delegate?.cameraControllerDidSendAssetAndTweet(self, asset: asset, tweet: self.postTextView.text)
@@ -211,8 +205,21 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
                 }
             }
         }
-        
-        
+    }
+    
+    // MARK: - TextView Delegate
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        self.view.endEditing(true)
+        super.touchesBegan(touches, withEvent: event)
+    }
+    
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        if let textErrors = Helper.isValidTweetWithErrors(textView.text, possibleNewCharacter: text) {
+            print(textErrors)
+            return false
+        } else {
+            return true
+        }
     }
     
 }
@@ -228,7 +235,6 @@ extension CameraViewController {
         //        recordButton.enabled = sender
         // Only enable the ability to change camera if the device has more than one camera.
         switchButton.enabled = sender && (AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo).count > 1)
-        isInstantSwitch.enabled = sender
         
     }
     

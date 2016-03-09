@@ -27,3 +27,8 @@ enum Notify: String {
 enum App: String {
     case Name = "Do It Live"
 }
+
+enum UserDefaultsKeys: String {
+    case firstLoad = "firstLoad"
+    case firstView = "firstView"
+}

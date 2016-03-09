@@ -44,6 +44,15 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
     
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if NSUserDefaults.standardUserDefaults().boolForKey(UserDefaultsKeys.firstView.rawValue) == true {
+            let cameraVC = self.camera.getCameraVC()
+            self.presentViewController(cameraVC, animated: true, completion: nil)
+        }
+    }
+    
     func implementReceivedImageAndText(image: UIImage, text: String) {
         let data = UIImageJPEGRepresentation(image, 0.5)
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
