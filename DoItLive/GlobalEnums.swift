@@ -31,4 +31,5 @@ enum App: String {
 enum UserDefaultsKeys: String {
     case firstLoad = "firstLoad"
     case firstView = "firstView"
+    case savedTweet = "savedTweet"
 }

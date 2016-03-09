@@ -101,7 +101,17 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         didSendPhoto = false
         activateCamera()
         authorizePhotos()
-    
+        
+        //tweet
+        if let savedTweet = NSUserDefaults.standardUserDefaults().stringForKey(UserDefaultsKeys.savedTweet.rawValue) {
+            if savedTweet == "" || savedTweet == " " {
+                postTextView.text = "#doitlive"
+            } else {
+                postTextView.text = savedTweet
+            }
+        } else {
+            postTextView.text = "#doitlive"
+        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -215,6 +225,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
                     if let currentText = self.postTextView.text {
                         let remainingCharacters = 140 - currentText.characters.count
                         self.postCountLabel.text = "Characters left: \(remainingCharacters.description)"
+                        NSUserDefaults.standardUserDefaults().setObject(currentText, forKey: UserDefaultsKeys.savedTweet.rawValue)
                     }
                 }
             }
@@ -232,6 +243,12 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
             let remainingCharacters = 140 - currentText.characters.count
             postCountLabel.text = "Characters left: \(remainingCharacters.description)"
         }
+    }
+    
+    func textViewDidEndEditing(textView: UITextView) {
+        textView.resignFirstResponder()
+        let tweet = textView.text
+        NSUserDefaults.standardUserDefaults().setObject(tweet, forKey: UserDefaultsKeys.savedTweet.rawValue)
     }
     
     func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
