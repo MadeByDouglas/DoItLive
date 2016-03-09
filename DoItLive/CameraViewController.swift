@@ -13,6 +13,7 @@
 import UIKit
 import AVFoundation
 import Photos
+import TwitterKit
 
 private var CapturingStillImageContext = UnsafeMutablePointer<Void>.alloc(1)
 private var SessionRunningContext = UnsafeMutablePointer<Void>.alloc(1)
@@ -31,12 +32,14 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
 
     weak var delegate: CameraViewControllerDelegate?
     
-    @IBOutlet weak var postView: UIView!
     @IBOutlet weak var previewView: Preview!
     
     @IBOutlet weak var feedButton: UIButton!
     
+    @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var postTextView: UITextView!
+    @IBOutlet weak var postCountLabel: UILabel!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     @IBOutlet weak var shutterButton: UIButton!
     @IBOutlet weak var switchButton: UIButton!
@@ -75,7 +78,9 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     override func viewDidLoad() {
         super.viewDidLoad()
         postTextView.delegate = self
-        
+        if let userName = Twitter.sharedInstance().session()?.userName {
+            userNameLabel.text = "@\(userName)"
+        }
         newPhotoReady = false
         
         // Disable UI. The UI is enabled if and only if the session starts running.
@@ -194,14 +199,23 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         
         //Instant publish
         if self.newPhotoReady == true {
-            
-            if let asset = collectionChanges.fetchResultAfterChanges[0] as? PHAsset {
-                self.delegate?.cameraControllerDidSendAssetAndTweet(self, asset: asset, tweet: self.postTextView.text)
-                self.newPhotoReady = false
-                self.didSendPhoto = true
-                dispatch_async(dispatch_get_main_queue()) {
+            dispatch_async(dispatch_get_main_queue()) {
+
+                self.activityIndicator.startAnimating()
+                self.enableUI(false)
+                if let asset = collectionChanges.fetchResultAfterChanges[0] as? PHAsset {
+                    self.delegate?.cameraControllerDidSendAssetAndTweet(self, asset: asset, tweet: self.postTextView.text)
+                    self.newPhotoReady = false
+                    self.didSendPhoto = true
+                    
+                    self.activityIndicator.stopAnimating()
+                    self.enableUI(true)
                     self.postTextView.text.removeAll()
                     self.postTextView.text = "#doitlive"
+                    if let currentText = self.postTextView.text {
+                        let remainingCharacters = 140 - currentText.characters.count
+                        self.postCountLabel.text = "Characters left: \(remainingCharacters.description)"
+                    }
                 }
             }
         }
@@ -213,11 +227,37 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         super.touchesBegan(touches, withEvent: event)
     }
     
+    func textViewDidBeginEditing(textView: UITextView) {
+        if let currentText = textView.text {
+            let remainingCharacters = 140 - currentText.characters.count
+            postCountLabel.text = "Characters left: \(remainingCharacters.description)"
+        }
+    }
+    
     func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        //enable tab
+        if text == "\t" {
+            textView.endEditing(true)
+            return false
+        }
+        
+        //also check when deleting
+        if range.length==1 && text.isEmpty {
+            if let currentText = textView.text {
+                let remainingCharacters = 140 - (currentText.characters.count - 1)
+                postCountLabel.text = "Characters left: \(remainingCharacters.description)"
+            }
+            return true
+        }
+        
         if let textErrors = Helper.isValidTweetWithErrors(textView.text, possibleNewCharacter: text) {
             print(textErrors)
             return false
         } else {
+            if let currentText = textView.text {
+                let remainingCharacters = 140 - (currentText.characters.count + text.characters.count)
+                postCountLabel.text = "Characters left: \(remainingCharacters.description)"
+            }
             return true
         }
     }
@@ -484,6 +524,8 @@ extension CameraViewController {
     //MARK: Actions
     
     func captureStillImage() {
+        activityIndicator.startAnimating()
+        enableUI(false)
         dispatch_async(self.sessionQueue) {
             let connection = self.stillImageOutput.connectionWithMediaType(AVMediaTypeVideo)
             let previewLayer = self.previewView.layer as! AVCaptureVideoPreviewLayer
@@ -514,6 +556,10 @@ extension CameraViewController {
                                         } else {
                                             self.newPhotoReady = true
                                         }
+                                        dispatch_async(dispatch_get_main_queue()) {
+                                            self.activityIndicator.stopAnimating()
+                                            self.enableUI(true)
+                                        }
                                 })
                             } else {
                                 let temporaryFileName = NSProcessInfo().globallyUniqueString as NSString
@@ -534,6 +580,11 @@ extension CameraViewController {
                                             NSLog("Error occurred while saving image to photo library: %@", error!)
                                         } else {
                                             self.newPhotoReady = true
+                                        }
+                                        
+                                        dispatch_async(dispatch_get_main_queue()) {
+                                            self.activityIndicator.stopAnimating()
+                                            self.enableUI(true)
                                         }
                                         
                                         // Delete the temporary file.

@@ -36,6 +36,7 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         self.dataSource = userDataSource
         self.showTweetActions = true
         
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "presentCamera:", name: UIApplicationDidBecomeActiveNotification, object: nil)
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -48,6 +49,13 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         super.viewDidAppear(animated)
         
         if NSUserDefaults.standardUserDefaults().boolForKey(UserDefaultsKeys.firstView.rawValue) == true {
+            let cameraVC = self.camera.getCameraVC()
+            self.presentViewController(cameraVC, animated: true, completion: nil)
+        }
+    }
+    
+    func presentCamera(notification: NSNotification) {
+        if NSUserDefaults.standardUserDefaults().boolForKey(UserDefaultsKeys.firstView.rawValue) == true && self.isViewLoaded() == true && self.view.window != nil && self == self.navigationController?.visibleViewController {
             let cameraVC = self.camera.getCameraVC()
             self.presentViewController(cameraVC, animated: true, completion: nil)
         }
