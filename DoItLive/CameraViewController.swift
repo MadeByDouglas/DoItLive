@@ -6,10 +6,6 @@
 //  Copyright © 2016 madebydouglas. All rights reserved.
 //
 
-// camera icon: <div>Icons made by <a href="http://www.flaticon.com/authors/designmodo" title="Designmodo">Designmodo</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
-// shutter icon: <div>Icons made by <a href="http://www.flaticon.com/authors/bogdan-rosu" title="Bogdan Rosu">Bogdan Rosu</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
-
-
 import UIKit
 import AVFoundation
 import Photos
@@ -28,7 +24,7 @@ protocol CameraViewControllerDelegate: class {
     func cameraControllerDidSendAssetAndTweet(controller: CameraViewController, asset: PHAsset, tweet: String)
 }
 
-class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDelegate,*/ UITextViewDelegate, PHPhotoLibraryChangeObserver {
+class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDelegate,*/ UITextViewDelegate {
 
     weak var delegate: CameraViewControllerDelegate?
     
@@ -91,7 +87,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         setupCamerasAndConfigureSession()
         
         // Photos
-        PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
+//        PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
         
     }
     
@@ -105,12 +101,12 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         //tweet
         if let savedTweet = NSUserDefaults.standardUserDefaults().stringForKey(UserDefaultsKeys.savedTweet.rawValue) {
             if savedTweet == "" || savedTweet == " " {
-                postTextView.text = "#doitlive"
+                postTextView.text = App.Hashtag.rawValue
             } else {
                 postTextView.text = savedTweet
             }
         } else {
-            postTextView.text = "#doitlive"
+            postTextView.text = App.Hashtag.rawValue
         }
     }
     
@@ -138,10 +134,10 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         super.viewDidDisappear(animated)
     }
     
-    deinit {
-        PHPhotoLibrary.sharedPhotoLibrary().unregisterChangeObserver(self)
-        //        print("camera was deinit")
-    }
+//    deinit {
+//        PHPhotoLibrary.sharedPhotoLibrary().unregisterChangeObserver(self)
+//        print("camera was deinit")
+//    }
     
     //MARK: View Preferences
     
@@ -200,37 +196,37 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     }
     
     // MARK: - PHPhotoLibraryChangeObserver
-    func photoLibraryDidChange(changeInstance: PHChange) {
-        // Check if there are changes to the assets we are showing.
-        guard let
-            assetsFetchResults = self.photosData.assetsFetchResults,
-            collectionChanges = changeInstance.changeDetailsForFetchResult(assetsFetchResults)
-            else {return}
-        
-        //Instant publish
-        if self.newPhotoReady == true {
-            dispatch_async(dispatch_get_main_queue()) {
-
-                self.activityIndicator.startAnimating()
-                self.enableUI(false)
-                if let asset = collectionChanges.fetchResultAfterChanges[0] as? PHAsset {
-                    self.delegate?.cameraControllerDidSendAssetAndTweet(self, asset: asset, tweet: self.postTextView.text)
-                    self.newPhotoReady = false
-                    self.didSendPhoto = true
-                    
-                    self.activityIndicator.stopAnimating()
-                    self.enableUI(true)
-                    self.postTextView.text.removeAll()
-                    self.postTextView.text = "#doitlive"
-                    if let currentText = self.postTextView.text {
-                        let remainingCharacters = 140 - currentText.characters.count
-                        self.postCountLabel.text = "Characters left: \(remainingCharacters.description)"
-                        NSUserDefaults.standardUserDefaults().setObject(currentText, forKey: UserDefaultsKeys.savedTweet.rawValue)
-                    }
-                }
-            }
-        }
-    }
+//    func photoLibraryDidChange(changeInstance: PHChange) {
+//        // Check if there are changes to the assets we are showing.
+//        guard let
+//            assetsFetchResults = self.photosData.assetsFetchResults,
+//            collectionChanges = changeInstance.changeDetailsForFetchResult(assetsFetchResults)
+//            else {return}
+//        
+//        //Instant publish
+//        if self.newPhotoReady == true {
+//            dispatch_async(dispatch_get_main_queue()) {
+//                self.newPhotoReady = false
+//
+//                self.activityIndicator.startAnimating()
+//                self.enableUI(false)
+//                if let asset = collectionChanges.fetchResultAfterChanges[0] as? PHAsset {
+//                    self.delegate?.cameraControllerDidSendAssetAndTweet(self, asset: asset, tweet: self.postTextView.text)
+//                    self.didSendPhoto = true
+//                    
+//                    self.activityIndicator.stopAnimating()
+//                    self.enableUI(true)
+//                    self.postTextView.text.removeAll()
+//                    self.postTextView.text = App.Hashtag.rawValue
+//                    if let currentText = self.postTextView.text {
+//                        let remainingCharacters = 140 - currentText.characters.count
+//                        self.postCountLabel.text = "Characters left: \(remainingCharacters.description)"
+//                        NSUserDefaults.standardUserDefaults().setObject(currentText, forKey: UserDefaultsKeys.savedTweet.rawValue)
+//                    }
+//                }
+//            }
+//        }
+//    }
     
     // MARK: - TextView Delegate
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -558,6 +554,22 @@ extension CameraViewController {
                 if imageDataSampleBuffer != nil {
                     // The sample buffer is not retained. Create image data before saving the still image to the photo library asynchronously.
                     let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataSampleBuffer)
+                    
+                    //tweet
+                    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+                    appDelegate.swifter.postStatusUpdate(self.postTextView.text, media: imageData)
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.postTextView.text.removeAll()
+                        self.postTextView.text = App.Hashtag.rawValue
+                        if let currentText = self.postTextView.text {
+                            let remainingCharacters = 140 - currentText.characters.count
+                            self.postCountLabel.text = "Characters left: \(remainingCharacters.description)"
+                            NSUserDefaults.standardUserDefaults().setObject(currentText, forKey: UserDefaultsKeys.savedTweet.rawValue)
+                        }
+                    }
+                    
+                    //save to disk
                     PHPhotoLibrary.requestAuthorization {status in
                         if status == PHAuthorizationStatus.Authorized {
                             // To preserve the metadata, we create an asset from the JPEG NSData representation.

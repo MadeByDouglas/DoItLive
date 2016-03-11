@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "camera shutter@64.png",
+      "filename" : "swap camera icon@40.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "camera shutter@128.png",
+      "filename" : "swap camera icon@80.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "camera shutter@192.png",
+      "filename" : "swap camera icon@120.png",
       "scale" : "3x"
     }
   ],

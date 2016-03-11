@@ -32,7 +32,7 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         
         let userID = Twitter.sharedInstance().sessionStore.session()?.userID
         let client = TWTRAPIClient(userID: userID)
-        let userDataSource = TWTRSearchTimelineDataSource(searchQuery: "#doitlive", APIClient: client)
+        let userDataSource = TWTRSearchTimelineDataSource(searchQuery: App.Hashtag.rawValue, APIClient: client)
         self.dataSource = userDataSource
         self.showTweetActions = true
         
@@ -65,11 +65,7 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         let data = UIImageJPEGRepresentation(image, 0.5)
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         appDelegate.swifter.postStatusUpdate(text, media: data!)
-//        swifter.postMedia(data!, success: { (status) -> Void in
-//            print("it worked")
-//            }) { (error) -> Void in
-//                print(error.description)
-//        }
+
     }
     
     // MARK: - Camera Menu

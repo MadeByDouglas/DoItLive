@@ -102,7 +102,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" id="iq4-W8-kDA" userLabel="Image Preview View" customClass="Preview" customModule="DoItLive" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="75" width="320" height="427"/>
+                                <rect key="frame" x="0.0" y="73" width="320" height="427"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="iq4-W8-kDA" secondAttribute="height" multiplier="3:4" id="4aY-Dn-e0O"/>
@@ -131,7 +131,7 @@
                                 <rect key="frame" x="142" y="265" width="37" height="37"/>
                             </activityIndicatorView>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="#doitlive" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Kv2-e0-hM2">
-                                <rect key="frame" x="8" y="0.0" width="304" height="63"/>
+                                <rect key="frame" x="8" y="0.0" width="304" height="61"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -141,50 +141,53 @@
                                 </connections>
                             </textView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Characters left:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wln-Jc-03m">
-                                <rect key="frame" x="224" y="63" width="88" height="12"/>
+                                <rect key="frame" x="224" y="61" width="88" height="12"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Username" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="R8R-8s-M6a">
-                                <rect key="frame" x="8" y="63" width="58" height="12"/>
+                                <rect key="frame" x="8" y="61" width="58" height="12"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7Tb-Rc-kHo" userLabel="Camera Controls View">
-                                <rect key="frame" x="0.0" y="502" width="320" height="66"/>
+                                <rect key="frame" x="0.0" y="500" width="320" height="68"/>
                                 <subviews>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S45-xA-icv">
-                                        <rect key="frame" x="43" y="17" width="41" height="33"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                        <state key="normal" title="FEED">
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="S45-xA-icv">
+                                        <rect key="frame" x="43" y="14" width="40" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="40" id="LGT-EY-HQk"/>
+                                            <constraint firstAttribute="height" constant="40" id="lFg-82-RMP"/>
+                                        </constraints>
+                                        <state key="normal" image="camera-feed">
                                             <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         </state>
                                         <connections>
                                             <action selector="didTapFeed:" destination="4ub-9c-lM8" eventType="touchUpInside" id="NKP-C7-8Uh"/>
                                         </connections>
                                     </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kay-lE-Kcd" userLabel="Switch Button">
-                                        <rect key="frame" x="236" y="17" width="38" height="32"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="38" id="UVn-YC-07S"/>
-                                            <constraint firstAttribute="height" constant="32" id="YkL-eT-gs0"/>
-                                        </constraints>
-                                        <state key="normal" image="camera-switch"/>
-                                        <connections>
-                                            <action selector="didTapSwitchCamera:" destination="4ub-9c-lM8" eventType="touchUpInside" id="6Rc-rR-aMg"/>
-                                        </connections>
-                                    </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K1e-vh-XQ7" userLabel="Shutter Button">
-                                        <rect key="frame" x="129" y="2" width="62" height="62"/>
+                                        <rect key="frame" x="128" y="2" width="64" height="64"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="62" id="KwP-VF-kkf"/>
-                                            <constraint firstAttribute="height" constant="62" id="cfq-OX-Nu7"/>
+                                            <constraint firstAttribute="width" constant="64" id="KwP-VF-kkf"/>
+                                            <constraint firstAttribute="height" constant="64" id="cfq-OX-Nu7"/>
                                         </constraints>
                                         <state key="normal" image="camera-shutter"/>
                                         <connections>
                                             <action selector="didTapShutter:" destination="4ub-9c-lM8" eventType="touchUpInside" id="5Nd-hP-Vkb"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kay-lE-Kcd" userLabel="Switch Button">
+                                        <rect key="frame" x="237" y="14" width="40" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="40" id="UVn-YC-07S"/>
+                                            <constraint firstAttribute="height" constant="40" id="YkL-eT-gs0"/>
+                                        </constraints>
+                                        <state key="normal" image="camera-swap"/>
+                                        <connections>
+                                            <action selector="didTapSwitchCamera:" destination="4ub-9c-lM8" eventType="touchUpInside" id="6Rc-rR-aMg"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -192,7 +195,7 @@
                                 <constraints>
                                     <constraint firstItem="Kay-lE-Kcd" firstAttribute="centerY" secondItem="7Tb-Rc-kHo" secondAttribute="centerY" id="Cgv-bP-4bp"/>
                                     <constraint firstItem="S45-xA-icv" firstAttribute="centerY" secondItem="7Tb-Rc-kHo" secondAttribute="centerY" id="HOC-72-V0m"/>
-                                    <constraint firstAttribute="height" constant="66" id="gnN-Tn-6qJ"/>
+                                    <constraint firstAttribute="height" constant="68" id="gnN-Tn-6qJ"/>
                                     <constraint firstItem="K1e-vh-XQ7" firstAttribute="centerY" secondItem="7Tb-Rc-kHo" secondAttribute="centerY" id="sgs-Mq-icI"/>
                                     <constraint firstItem="K1e-vh-XQ7" firstAttribute="leading" secondItem="S45-xA-icv" secondAttribute="trailing" constant="45" id="tIf-NV-5qI"/>
                                     <constraint firstItem="K1e-vh-XQ7" firstAttribute="centerX" secondItem="7Tb-Rc-kHo" secondAttribute="centerX" id="vCj-38-7KK"/>
@@ -266,7 +269,8 @@
         </scene>
     </scenes>
     <resources>
-        <image name="camera-shutter" width="85" height="85"/>
-        <image name="camera-switch" width="85" height="85"/>
+        <image name="camera-feed" width="40" height="40"/>
+        <image name="camera-shutter" width="64" height="64"/>
+        <image name="camera-swap" width="40" height="40"/>
     </resources>
 </document>

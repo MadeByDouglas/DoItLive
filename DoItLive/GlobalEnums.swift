@@ -26,6 +26,7 @@ enum Notify: String {
 
 enum App: String {
     case Name = "Do It Live"
+    case Hashtag = "#doitlive"
 }
 
 enum UserDefaultsKeys: String {

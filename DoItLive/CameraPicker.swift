@@ -35,7 +35,7 @@ class CameraPicker: NSObject, UIImagePickerControllerDelegate, UINavigationContr
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
         if let url = info[UIImagePickerControllerReferenceURL] as? NSURL {
             if let asset = PHAsset.fetchAssetsWithALAssetURLs([url], options: nil).lastObject as? PHAsset {
-                sendImageForAssetAndTweet(asset, tweet: "#doitlive")
+                sendImageForAssetAndTweet(asset, tweet: App.Hashtag.rawValue)
                 picker.dismissViewControllerAnimated(true, completion: nil)
             }
         } else {
