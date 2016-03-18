@@ -32,7 +32,7 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         
         let userID = Twitter.sharedInstance().sessionStore.session()?.userID
         let client = TWTRAPIClient(userID: userID)
-        let userDataSource = TWTRSearchTimelineDataSource(searchQuery: App.Hashtag.rawValue, APIClient: client)
+        let userDataSource = TWTRSearchTimelineDataSource(searchQuery: "filter:safe \(App.Hashtag.rawValue)", APIClient: client)
         self.dataSource = userDataSource
         self.showTweetActions = true
         
