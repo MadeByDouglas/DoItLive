@@ -22,6 +22,10 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource {
 
         logInButton = TWTRLogInButton { (session, error) in
             if let unwrappedSession = session {
+                
+                //set bool true so if user logs out and logs back in during same session it pushes camera immediately
+                NSUserDefaults.standardUserDefaults().setBool(true, forKey: UserDefaultsKeys.firstView.rawValue)
+                
                 //log in notification
                 NSNotificationCenter.defaultCenter().postNotificationName(Notify.Login.rawValue, object: unwrappedSession)
             } else {

@@ -191,9 +191,11 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     }
     
     @IBAction func didTapLogout(sender: UIButton) {
-//        self.dismissViewControllerAnimated(true, completion: nil)
-        //log out notification
-        NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
+        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
+        self.dismissViewControllerAnimated(true) { 
+            //log out notification
+            NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
+        }
     }
     
     

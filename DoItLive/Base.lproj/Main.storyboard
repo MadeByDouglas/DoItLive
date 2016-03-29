@@ -174,8 +174,11 @@
                                 <rect key="frame" x="142" y="265" width="37" height="37"/>
                             </activityIndicatorView>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="#doitlive" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Kv2-e0-hM2">
-                                <rect key="frame" x="8" y="0.0" width="304" height="61"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <rect key="frame" x="8" y="0.0" width="304" height="59"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.30061961206896554" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="59" id="aeB-zT-37S"/>
+                                </constraints>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences" keyboardType="twitter" keyboardAppearance="alert" enablesReturnKeyAutomatically="YES"/>
@@ -184,19 +187,19 @@
                                 </connections>
                             </textView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Characters left:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wln-Jc-03m">
-                                <rect key="frame" x="224" y="61" width="88" height="12"/>
+                                <rect key="frame" x="224" y="59" width="88" height="15"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Username" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="R8R-8s-M6a">
-                                <rect key="frame" x="8" y="61" width="58" height="12"/>
+                                <rect key="frame" x="8" y="59" width="58" height="15"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dfo-3t-DpJ">
-                                <rect key="frame" x="8" y="81" width="48" height="30"/>
+                                <rect key="frame" x="8" y="82" width="48" height="30"/>
                                 <state key="normal" title="Logout">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -273,6 +276,7 @@
                             <constraint firstAttribute="trailing" secondItem="iq4-W8-kDA" secondAttribute="trailing" id="6nS-NE-03q"/>
                             <constraint firstItem="7Tb-Rc-kHo" firstAttribute="bottom" secondItem="iq4-W8-kDA" secondAttribute="bottom" id="FeO-Oj-8OR"/>
                             <constraint firstItem="iq4-W8-kDA" firstAttribute="leading" secondItem="SdL-7N-qx7" secondAttribute="leading" id="GvC-ae-hJf"/>
+                            <constraint firstItem="iq4-W8-kDA" firstAttribute="centerY" secondItem="SdL-7N-qx7" secondAttribute="centerY" constant="2" id="LP5-yc-rJw"/>
                             <constraint firstItem="iq4-W8-kDA" firstAttribute="top" secondItem="R8R-8s-M6a" secondAttribute="bottom" id="Nnf-gl-fTH"/>
                             <constraint firstItem="dfo-3t-DpJ" firstAttribute="top" secondItem="99P-Bn-1jD" secondAttribute="bottom" constant="24" id="Tka-yl-2Sb"/>
                             <constraint firstItem="R8R-8s-M6a" firstAttribute="leading" secondItem="SdL-7N-qx7" secondAttribute="leading" constant="8" id="TsY-tC-Xws"/>
@@ -293,8 +297,12 @@
                         </constraints>
                         <variation key="default">
                             <mask key="constraints">
+                                <exclude reference="Nnf-gl-fTH"/>
+                                <exclude reference="mF7-2B-Wmk"/>
+                                <exclude reference="tsL-it-L8J"/>
                                 <exclude reference="Tka-yl-2Sb"/>
                                 <exclude reference="FeO-Oj-8OR"/>
+                                <exclude reference="eNn-V7-MYY"/>
                                 <exclude reference="eet-vV-o0r"/>
                             </mask>
                         </variation>
