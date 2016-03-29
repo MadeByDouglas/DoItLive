@@ -161,6 +161,43 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         }
     }
     
+    func showTwitterMenu() {
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
+        alertController.modalPresentationStyle = UIModalPresentationStyle.Popover
+        
+        alertController.addAction(UIAlertAction(title: "Twitter Feed", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
+            guard let userName = Twitter.sharedInstance().session()?.userName else {
+                return
+            }
+            if UIApplication.sharedApplication().canOpenURL(NSURL(string: "twitter://")!) {
+                let twitterProfileURL = NSURL(string: "twitter:///\(userName)")
+                UIApplication.sharedApplication().openURL(twitterProfileURL!)
+                
+            } else {
+                let twitterProfileURL = NSURL(string: "https://twitter.com/\(userName)")
+                UIApplication.sharedApplication().openURL(twitterProfileURL!)
+            }
+        }))
+        
+        alertController.addAction(UIAlertAction(title: "Log Out", style: UIAlertActionStyle.Destructive, handler: { (action: UIAlertAction ) -> Void in
+            NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
+            self.dismissViewControllerAnimated(true) {
+                //log out notification
+                NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
+            }
+        }))
+
+        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: { (action: UIAlertAction) -> Void in
+            
+        }))
+        
+        if self.presentedViewController == nil {
+            self.presentViewController(alertController, animated: true, completion: nil)
+        } else {
+            print("\(classForCoder).alertController something already presented")
+        }
+    }
+    
     //MARK: Buttons
     
     @IBAction func didTapShutter(sender: UIButton) {
@@ -173,31 +210,11 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     @IBAction func didTapFeed(sender: UIButton) {
         
-        guard let userName = Twitter.sharedInstance().session()?.userName else {
-            return
-        }
-        if UIApplication.sharedApplication().canOpenURL(NSURL(string: "twitter://")!) {
-            let twitterProfileURL = NSURL(string: "twitter:///\(userName)")
-            UIApplication.sharedApplication().openURL(twitterProfileURL!)
-
-        } else {
-            let twitterProfileURL = NSURL(string: "https://twitter.com/\(userName)")
-            UIApplication.sharedApplication().openURL(twitterProfileURL!)
-        }
-        
+        showTwitterMenu()
         
 //        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
 //        self.dismissViewControllerAnimated(true, completion: nil)
     }
-    
-    @IBAction func didTapLogout(sender: UIButton) {
-        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
-        self.dismissViewControllerAnimated(true) { 
-            //log out notification
-            NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
-        }
-    }
-    
     
     @IBAction func didTapResume(sender: UIButton) {
         resumeSession()
