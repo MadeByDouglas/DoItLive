@@ -147,6 +147,10 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     func blurPreview(sender: Bool) {
         if self.setupResult == AVCamSetupResult.Success {
+            guard let _ = blurView else {
+                return
+            }
+            
             UIView.animateWithDuration(0.3) { () -> Void in
                 if sender == true {
                     self.blurView.alpha = 1
@@ -168,8 +172,28 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     }
     
     @IBAction func didTapFeed(sender: UIButton) {
-        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
-        self.dismissViewControllerAnimated(true, completion: nil)
+        
+        guard let userName = Twitter.sharedInstance().session()?.userName else {
+            return
+        }
+        if UIApplication.sharedApplication().canOpenURL(NSURL(string: "twitter://")!) {
+            let twitterProfileURL = NSURL(string: "twitter:///\(userName)")
+            UIApplication.sharedApplication().openURL(twitterProfileURL!)
+
+        } else {
+            let twitterProfileURL = NSURL(string: "https://twitter.com/\(userName)")
+            UIApplication.sharedApplication().openURL(twitterProfileURL!)
+        }
+        
+        
+//        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
+//        self.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    @IBAction func didTapLogout(sender: UIButton) {
+//        self.dismissViewControllerAnimated(true, completion: nil)
+        //log out notification
+        NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
     }
     
     
@@ -678,7 +702,7 @@ extension CameraViewController {
                 //remove notifications for old camera input
                 NSNotificationCenter.defaultCenter().removeObserver(self, name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: currentVideoDevice)
                 //start notifications for new camera input
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange:",  name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: videoDevice)
+                NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange),  name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: videoDevice)
                 
                 CameraViewController.setFlashMode(AVCaptureFlashMode.Auto, forDevice: videoDevice!)
                 
@@ -819,14 +843,14 @@ extension CameraViewController {
         self.session.addObserver(self, forKeyPath: "running", options: NSKeyValueObservingOptions.New, context: SessionRunningContext)
         self.stillImageOutput.addObserver(self, forKeyPath: "capturingStillImage", options:NSKeyValueObservingOptions.New, context: CapturingStillImageContext)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange:", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput.device)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "sessionRuntimeError:", name: AVCaptureSessionRuntimeErrorNotification, object: self.session)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange), name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput.device)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.sessionRuntimeError(_:)), name: AVCaptureSessionRuntimeErrorNotification, object: self.session)
         // A session can only run when the app is full screen. It will be interrupted in a multi-app layout, introduced in iOS 9,
         // see also the documentation of AVCaptureSessionInterruptionReason. Add observers to handle these session interruptions
         // and show a preview is paused message. See the documentation of AVCaptureSessionWasInterruptedNotification for other
         // interruption reasons.
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "sessionWasInterrupted:", name: AVCaptureSessionWasInterruptedNotification, object: self.session)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "sessionInterruptionEnded:", name: AVCaptureSessionInterruptionEndedNotification, object: self.session)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.sessionWasInterrupted(_:)), name: AVCaptureSessionWasInterruptedNotification, object: self.session)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.sessionInterruptionEnded(_:)), name: AVCaptureSessionInterruptionEndedNotification, object: self.session)
     }
     
     private func removeCamObservers() {
@@ -866,7 +890,7 @@ extension CameraViewController {
         }
     }
     
-    func subjectAreaDidChange(notification: NSNotification) {
+    func subjectAreaDidChange() {
         let devicePoint = CGPointMake(0.5, 0.5)
         self.focusWithMode(AVCaptureFocusMode.ContinuousAutoFocus, exposeWithMode: AVCaptureExposureMode.ContinuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: false)
     }

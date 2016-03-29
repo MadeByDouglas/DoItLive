@@ -8,13 +8,19 @@
 
 import UIKit
 import TwitterKit
+import QuickLook
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, QLPreviewControllerDataSource {
+    
+    @IBOutlet weak var termsButton: UIButton!
+    @IBOutlet weak var acceptSwitch: UISwitch!
+    var logInButton: TWTRLogInButton!
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let logInButton = TWTRLogInButton { (session, error) in
+        logInButton = TWTRLogInButton { (session, error) in
             if let unwrappedSession = session {
                 //log in notification
                 NSNotificationCenter.defaultCenter().postNotificationName(Notify.Login.rawValue, object: unwrappedSession)
@@ -27,6 +33,10 @@ class LoginViewController: UIViewController {
         logInButton.center = self.view.center
         self.view.addSubview(logInButton)
     }
+    
+    override func viewWillAppear(animated: Bool) {
+        logInButton.enabled = acceptSwitch.on
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -35,6 +45,28 @@ class LoginViewController: UIViewController {
     
     override internal func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
         return UIInterfaceOrientationMask.Portrait
+    }
+    
+    //MARK: - QuickLook
+    func numberOfPreviewItemsInPreviewController(controller: QLPreviewController) -> Int{
+        return 1
+    }
+    
+    func previewController(controller: QLPreviewController, previewItemAtIndex index: Int) -> QLPreviewItem {
+        let termsPath = NSBundle.mainBundle().pathForResource("App EULA", ofType: "pdf")
+        let termsFile = NSURL(fileURLWithPath: termsPath!)
+        return termsFile
+    }
+    
+    //MARK:  - IBActions
+    @IBAction func didTapSwitch(sender: UISwitch) {
+        logInButton.enabled = acceptSwitch.on
+    }
+    
+    @IBAction func didTapTerms(sender: UIButton) {
+        let quickLook = QLPreviewController()
+        quickLook.dataSource = self
+        presentViewController(quickLook, animated: true, completion: nil)
     }
     
 

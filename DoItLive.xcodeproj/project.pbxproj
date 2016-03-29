@@ -27,6 +27,7 @@
 		C365153C1C8969370031D525 /* userDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C365153B1C8969370031D525 /* userDataSource.swift */; };
 		C36515501C898EF80031D525 /* SwifteriOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C36515481C89817A0031D525 /* SwifteriOS.framework */; };
 		C36515511C898EF80031D525 /* SwifteriOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C36515481C89817A0031D525 /* SwifteriOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C3CF09DF1CAA1955000AFDA0 /* App EULA.pdf in Resources */ = {isa = PBXBuildFile; fileRef = C3CF09DE1CAA1955000AFDA0 /* App EULA.pdf */; };
 		C3F6F8D71C880C30007376C6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F6F8D61C880C30007376C6 /* AppDelegate.swift */; };
 		C3F6F8E01C880C30007376C6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3F6F8DE1C880C30007376C6 /* Main.storyboard */; };
 		C3F6F8E21C880C30007376C6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F6F8E11C880C30007376C6 /* Assets.xcassets */; };
@@ -112,6 +113,7 @@
 		C36515381C89042B0031D525 /* GlobalEnums.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalEnums.swift; sourceTree = "<group>"; };
 		C365153B1C8969370031D525 /* userDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = userDataSource.swift; sourceTree = "<group>"; };
 		C365153D1C8981790031D525 /* Swifter.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Swifter.xcodeproj; path = ../Templates/Swifter/Swifter.xcodeproj; sourceTree = "<group>"; };
+		C3CF09DE1CAA1955000AFDA0 /* App EULA.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "App EULA.pdf"; sourceTree = "<group>"; };
 		C3F6F8D31C880C30007376C6 /* DoItLive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoItLive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3F6F8D61C880C30007376C6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C3F6F8DF1C880C30007376C6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -150,6 +152,7 @@
 		C36515331C8823D60031D525 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				C3CF09DE1CAA1955000AFDA0 /* App EULA.pdf */,
 				C36515381C89042B0031D525 /* GlobalEnums.swift */,
 				C365152A1C881DA70031D525 /* Extensions.swift */,
 				C365152E1C88201F0031D525 /* Helper.swift */,
@@ -327,6 +330,7 @@
 				C365151A1C880EBD0031D525 /* TwitterKitResources.bundle in Resources */,
 				C3F6F8E51C880C30007376C6 /* LaunchScreen.storyboard in Resources */,
 				C3F6F8E21C880C30007376C6 /* Assets.xcassets in Resources */,
+				C3CF09DF1CAA1955000AFDA0 /* App EULA.pdf in Resources */,
 				C3F6F8E01C880C30007376C6 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
