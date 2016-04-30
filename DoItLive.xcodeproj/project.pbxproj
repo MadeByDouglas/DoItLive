@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C34FD4DD1CD55A0C00971CC4 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD4DA1CD55A0C00971CC4 /* FBSDKCoreKit.framework */; };
+		C34FD4DE1CD55A0C00971CC4 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD4DB1CD55A0C00971CC4 /* FBSDKLoginKit.framework */; };
+		C34FD4DF1CD55A0C00971CC4 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD4DC1CD55A0C00971CC4 /* FBSDKShareKit.framework */; };
 		C36515181C880EBD0031D525 /* Fabric.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C36515141C880EBD0031D525 /* Fabric.framework */; };
 		C36515191C880EBD0031D525 /* TwitterKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C36515151C880EBD0031D525 /* TwitterKit.framework */; };
 		C365151A1C880EBD0031D525 /* TwitterKitResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C36515161C880EBD0031D525 /* TwitterKitResources.bundle */; };
@@ -94,6 +97,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C34FD4DA1CD55A0C00971CC4 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKCoreKit.framework; sourceTree = "<group>"; };
+		C34FD4DB1CD55A0C00971CC4 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKLoginKit.framework; sourceTree = "<group>"; };
+		C34FD4DC1CD55A0C00971CC4 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FBSDKShareKit.framework; sourceTree = "<group>"; };
 		C36515141C880EBD0031D525 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		C36515151C880EBD0031D525 /* TwitterKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = TwitterKit.framework; sourceTree = "<group>"; };
 		C36515161C880EBD0031D525 /* TwitterKitResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = TwitterKitResources.bundle; path = TwitterKit.framework/Versions/A/Resources/TwitterKitResources.bundle; sourceTree = "<group>"; };
@@ -127,7 +133,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C34FD4DD1CD55A0C00971CC4 /* FBSDKCoreKit.framework in Frameworks */,
 				C36515181C880EBD0031D525 /* Fabric.framework in Frameworks */,
+				C34FD4DE1CD55A0C00971CC4 /* FBSDKLoginKit.framework in Frameworks */,
+				C34FD4DF1CD55A0C00971CC4 /* FBSDKShareKit.framework in Frameworks */,
 				C365151B1C880EBD0031D525 /* TwitterCore.framework in Frameworks */,
 				C36515501C898EF80031D525 /* SwifteriOS.framework in Frameworks */,
 				C36515191C880EBD0031D525 /* TwitterKit.framework in Frameworks */,
@@ -188,6 +197,9 @@
 				C3F6F8D51C880C30007376C6 /* DoItLive */,
 				C3F6F8D41C880C30007376C6 /* Products */,
 				C365153D1C8981790031D525 /* Swifter.xcodeproj */,
+				C34FD4DA1CD55A0C00971CC4 /* FBSDKCoreKit.framework */,
+				C34FD4DB1CD55A0C00971CC4 /* FBSDKLoginKit.framework */,
+				C34FD4DC1CD55A0C00971CC4 /* FBSDKShareKit.framework */,
 				C36515141C880EBD0031D525 /* Fabric.framework */,
 				C36515151C880EBD0031D525 /* TwitterKit.framework */,
 				C36515161C880EBD0031D525 /* TwitterKitResources.bundle */,
@@ -497,6 +509,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/DoItLive",
 				);
 				INFOPLIST_FILE = DoItLive/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
@@ -515,6 +528,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/DoItLive",
 				);
 				INFOPLIST_FILE = DoItLive/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;

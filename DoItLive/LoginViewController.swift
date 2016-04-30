@@ -8,6 +8,7 @@
 
 import UIKit
 import TwitterKit
+import FBSDKLoginKit
 import QuickLook
 
 class LoginViewController: UIViewController, QLPreviewControllerDataSource {
@@ -15,10 +16,14 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource {
     @IBOutlet weak var termsButton: UIButton!
     @IBOutlet weak var acceptSwitch: UISwitch!
     var logInButton: TWTRLogInButton!
+    var logInButtonFacebook: FBSDKLoginButton!
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        logInButtonFacebook = FBSDKLoginButton()
+        logInButtonFacebook.readPermissions = ["public_profile", "email", "user_friends"] //could be handy in the future to grab more info like this, public profile is default setting
 
         logInButton = TWTRLogInButton { (session, error) in
             if let unwrappedSession = session {
@@ -36,10 +41,16 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource {
         // TODO: Change where the log in button is positioned in your view
         logInButton.center = self.view.center
         self.view.addSubview(logInButton)
+        
+        logInButtonFacebook.frame = logInButton.frame
+        logInButtonFacebook.titleLabel?.font = logInButton.titleLabel?.font
+        logInButtonFacebook.center.y = self.view.center.y - 60
+        self.view.addSubview(logInButtonFacebook)
     }
     
     override func viewWillAppear(animated: Bool) {
         logInButton.enabled = acceptSwitch.on
+        logInButtonFacebook.enabled = acceptSwitch.on
     }
 
     override func didReceiveMemoryWarning() {
@@ -65,6 +76,7 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource {
     //MARK:  - IBActions
     @IBAction func didTapSwitch(sender: UISwitch) {
         logInButton.enabled = acceptSwitch.on
+        logInButtonFacebook.enabled = acceptSwitch.on
     }
     
     @IBAction func didTapTerms(sender: UIButton) {

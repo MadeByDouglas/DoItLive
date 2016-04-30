@@ -74,7 +74,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     override func viewDidLoad() {
         super.viewDidLoad()
         postTextView.delegate = self
-        if let userName = Twitter.sharedInstance().session()?.userName {
+        if let userName = Twitter.sharedInstance().sessionStore.session()?.userID {
             userNameLabel.text = "@\(userName)"
         }
         newPhotoReady = false
@@ -166,7 +166,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         alertController.modalPresentationStyle = UIModalPresentationStyle.Popover
         
         alertController.addAction(UIAlertAction(title: "Twitter Feed", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
-            guard let userName = Twitter.sharedInstance().session()?.userName else {
+            guard let userName = Twitter.sharedInstance().sessionStore.session()?.userID else {
                 return
             }
             if UIApplication.sharedApplication().canOpenURL(NSURL(string: "twitter://")!) {
