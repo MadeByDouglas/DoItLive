@@ -10,6 +10,7 @@ import UIKit
 import AVFoundation
 import Photos
 import TwitterKit
+import FBSDKShareKit
 
 private var CapturingStillImageContext = UnsafeMutablePointer<Void>.alloc(1)
 private var SessionRunningContext = UnsafeMutablePointer<Void>.alloc(1)
@@ -604,6 +605,8 @@ extension CameraViewController {
                     //tweet
                     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
                     //TODO: - Post to Twitter and Facebook via Alamofire
+                    //facebook
+                    FBSDKShareAPI.shareWithContent(<#T##content: FBSDKSharingContent!##FBSDKSharingContent!#>, delegate: <#T##FBSDKSharingDelegate!#>)
                     
                     dispatch_async(dispatch_get_main_queue()) {
                         self.postTextView.text.removeAll()

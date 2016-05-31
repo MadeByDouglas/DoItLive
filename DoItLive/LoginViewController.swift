@@ -11,7 +11,7 @@ import TwitterKit
 import FBSDKLoginKit
 import QuickLook
 
-class LoginViewController: UIViewController, QLPreviewControllerDataSource {
+class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSDKLoginButtonDelegate {
     
     @IBOutlet weak var termsButton: UIButton!
     @IBOutlet weak var acceptSwitch: UISwitch!
@@ -23,6 +23,7 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource {
         super.viewDidLoad()
         
         logInButtonFacebook = FBSDKLoginButton()
+        logInButtonFacebook.delegate = self
         logInButtonFacebook.readPermissions = ["public_profile", "email", "user_friends"] //could be handy in the future to grab more info like this, public profile is default setting
         
 
@@ -86,15 +87,24 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource {
         presentViewController(quickLook, animated: true, completion: nil)
     }
     
+    func loginButton(loginButton: FBSDKLoginButton!, didCompleteWithResult result: FBSDKLoginManagerLoginResult!, error: NSError!) {
+        if let error = error {
+            print(error)
+        } else if result.isCancelled {
+            print("facebook login cancelled")
+        } else {
+            //set bool true so if user logs out and logs back in during same session it pushes camera immediately
+            //TODO: test moving the setting of the key inside login/logout notification for more consise code
+            NSUserDefaults.standardUserDefaults().setBool(true, forKey: UserDefaultsKeys.firstView.rawValue)
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+            NSNotificationCenter.defaultCenter().postNotificationName(Notify.Login.rawValue, object: nil, userInfo: ["FBSDKLoginResult":result])
+        }
     }
-    */
+    
+    func loginButtonDidLogOut(loginButton: FBSDKLoginButton!) {
+        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
+        NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
+
+    }
 
 }

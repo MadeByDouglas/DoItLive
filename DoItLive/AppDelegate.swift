@@ -28,9 +28,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         NSNotificationCenter.defaultCenter().addObserverForName(Notify.Login.rawValue, object: nil, queue: nil) { (notification) -> Void in
             if let twitterSession = notification.userInfo?["TWTRSession"] as? TWTRSession {
-                self.appLogin(twitterSession)
+                self.appLogin(twitterSession, facebookResult: nil)
+            } else if let facebookResult = notification.userInfo?["FBSDKLoginResult"] as? FBSDKLoginManagerLoginResult {
+                self.appLogin(nil, facebookResult: facebookResult)
             } else {
-                self.appLogin(nil) //probably should never get here
+                self.appLogin(nil, facebookResult: nil) //probably should never get here
             }
 
         }
@@ -48,7 +50,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return FBSDKApplicationDelegate.sharedInstance().application(application, openURL: url, sourceApplication: sourceApplication, annotation: annotation)
     }
     
-    func appLogin(twitterSession: TWTRSession?) {
+    func appLogin(twitterSession: TWTRSession?, facebookResult: FBSDKLoginManagerLoginResult?) {
         //login handled by twitter and fb buttons
 
         //Answers and Crashlytics Track login
@@ -58,6 +60,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             twitterUserName = session.userName
             NSUserDefaults.standardUserDefaults().setObject(session.userName, forKey: "twitterUserName")
             
+            //TODO: -clean up this test
             let client = TWTRAPIClient.clientWithCurrentUser()
             let request = client.URLRequestWithMethod("GET",
                                                       URL: "https://api.twitter.com/1.1/account/verify_credentials.json",
@@ -74,7 +77,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         
-        //TODO: get facebook userID
+        if let result = facebookResult {
+            Answers.logLoginWithMethod("Facebook", success: true, customAttributes: ["UserID":result.token.userID])
+            logUser(result.token.userID, userName: nil, userEmail: nil)
+        }
         
         handleAuth()
     }
