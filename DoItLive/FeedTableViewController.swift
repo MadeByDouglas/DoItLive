@@ -65,8 +65,7 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     func implementReceivedImageAndText(image: UIImage, text: String) {
         let data = UIImageJPEGRepresentation(image, 0.5)
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        appDelegate.swifter.postStatusUpdate(text, media: data!)
-
+        //TODO: - post to Twitter via Alamofire
     }
     
     // MARK: - Camera Menu

@@ -74,8 +74,11 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     override func viewDidLoad() {
         super.viewDidLoad()
         postTextView.delegate = self
-        if let userName = Twitter.sharedInstance().sessionStore.session()?.userID {
-            userNameLabel.text = "@\(userName)"
+        if let _ = Twitter.sharedInstance().sessionStore.session()?.userID {
+            let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+            if let userName = appDelegate.twitterUserName {
+                userNameLabel.text = "@\(userName)"
+            }
         }
         newPhotoReady = false
         
@@ -600,7 +603,7 @@ extension CameraViewController {
                     
                     //tweet
                     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-                    appDelegate.swifter.postStatusUpdate(self.postTextView.text, media: imageData)
+                    //TODO: - Post to Twitter and Facebook via Alamofire
                     
                     dispatch_async(dispatch_get_main_queue()) {
                         self.postTextView.text.removeAll()

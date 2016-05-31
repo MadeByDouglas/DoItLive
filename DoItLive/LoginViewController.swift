@@ -17,13 +17,14 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource {
     @IBOutlet weak var acceptSwitch: UISwitch!
     var logInButton: TWTRLogInButton!
     var logInButtonFacebook: FBSDKLoginButton!
-    
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
         logInButtonFacebook = FBSDKLoginButton()
         logInButtonFacebook.readPermissions = ["public_profile", "email", "user_friends"] //could be handy in the future to grab more info like this, public profile is default setting
+        
 
         logInButton = TWTRLogInButton { (session, error) in
             if let unwrappedSession = session {
@@ -32,7 +33,7 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource {
                 NSUserDefaults.standardUserDefaults().setBool(true, forKey: UserDefaultsKeys.firstView.rawValue)
                 
                 //log in notification
-                NSNotificationCenter.defaultCenter().postNotificationName(Notify.Login.rawValue, object: unwrappedSession)
+                NSNotificationCenter.defaultCenter().postNotificationName(Notify.Login.rawValue, object: nil, userInfo: ["TWTRSession":unwrappedSession])
             } else {
                 NSLog("In \(self.classForCoder.description()) Login error: %@", error!.localizedDescription);
             }
