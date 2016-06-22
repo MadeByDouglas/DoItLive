@@ -63,8 +63,8 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     }
     
     func implementReceivedImageAndText(image: UIImage, text: String) {
-        let data = UIImageJPEGRepresentation(image, 0.5)
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+//        let data = UIImageJPEGRepresentation(image, 0.5)
+//        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         //TODO: - post to Twitter via Alamofire
     }
     

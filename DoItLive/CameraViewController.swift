@@ -603,10 +603,10 @@ extension CameraViewController {
                     let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataSampleBuffer)
                     
                     //tweet
-                    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+//                    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
                     //TODO: - Post to Twitter and Facebook via Alamofire
                     //facebook
-                    FBSDKShareAPI.shareWithContent(<#T##content: FBSDKSharingContent!##FBSDKSharingContent!#>, delegate: <#T##FBSDKSharingDelegate!#>)
+//                    FBSDKShareAPI.shareWithContent(<#T##content: FBSDKSharingContent!##FBSDKSharingContent!#>, delegate: <#T##FBSDKSharingDelegate!#>)
                     
                     dispatch_async(dispatch_get_main_queue()) {
                         self.postTextView.text.removeAll()
