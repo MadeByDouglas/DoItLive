@@ -60,21 +60,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             twitterUserName = session.userName
             NSUserDefaults.standardUserDefaults().setObject(session.userName, forKey: "twitterUserName")
             
-            //TODO: -clean up this test
-            let client = TWTRAPIClient.clientWithCurrentUser()
-            let request = client.URLRequestWithMethod("GET",
-                                                      URL: "https://api.twitter.com/1.1/account/verify_credentials.json",
-                                                      parameters: ["include_email": "true", "skip_status": "true"],
-                                                      error: nil)
-            client.sendTwitterRequest(request) { (response, data, error) in
-                if let error = error {
-                    print(error.description)
-                } else if let data = data {
-                    let dictionary = JSON(data: data).dictionaryObject
-                    let email = dictionary!["email"]
-                    print(email)
-                }
-            }
         }
         
         if let result = facebookResult {
@@ -98,9 +83,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func handleAuth() {
-
         
-        if Twitter.sharedInstance().sessionStore.session() == nil {
+        if Twitter.sharedInstance().sessionStore.session() == nil && FBSDKAccessToken.currentAccessToken() == nil {
             //login root
             window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.Login.rawValue)
         } else {
@@ -108,6 +92,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if let userName = NSUserDefaults.standardUserDefaults().objectForKey("twitterUserName") as? String {
                 twitterUserName = userName
             }
+            
+            //TODO: make graph request to get facebook name
+            
             window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.NavFeed.rawValue)
 
         }

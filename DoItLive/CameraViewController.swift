@@ -11,6 +11,7 @@ import AVFoundation
 import Photos
 import TwitterKit
 import FBSDKShareKit
+import SwiftyJSON
 
 private var CapturingStillImageContext = UnsafeMutablePointer<Void>.alloc(1)
 private var SessionRunningContext = UnsafeMutablePointer<Void>.alloc(1)
@@ -325,6 +326,57 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
 }
 
 
+//MARK: - Facebook Delegate
+
+extension CameraViewController: FBSDKSharingDelegate {
+    func sharer(sharer: FBSDKSharing!, didCompleteWithResults results: [NSObject : AnyObject]!) {
+        //TODO: - Show happy animation
+    }
+    
+    func sharer(sharer: FBSDKSharing!, didFailWithError error: NSError!) {
+        //TODO: show sad pop up message
+        print(error)
+    }
+    
+    func sharerDidCancel(sharer: FBSDKSharing!) {
+        //probably shouldn't ever happen
+    }
+    
+
+    //MARK: - Twitter Methods
+
+    func tweetWithContent(tweetString: String, tweetImage: NSData) {
+        
+        let uploadUrl = "https://upload.twitter.com/1.1/media/upload.json"
+        let updateUrl = "https://api.twitter.com/1.1/statuses/update.json"
+        let imageString = tweetImage.base64EncodedStringWithOptions(NSDataBase64EncodingOptions())
+        
+        let client = TWTRAPIClient.clientWithCurrentUser()
+        
+        let request = client.URLRequestWithMethod("POST", URL: uploadUrl, parameters: ["media": imageString], error: nil)
+        client.sendTwitterRequest(request, completion: { (urlResponse, data, connectionError) -> Void in
+            
+            if let dictionary = JSON(data: data!).dictionaryObject {
+            
+                let message: [NSObject:AnyObject] = ["status": tweetString, "media_ids": dictionary["media_id_string"]!]
+                let request = client.URLRequestWithMethod("POST",
+                    URL: updateUrl, parameters: message, error:nil)
+                
+                client.sendTwitterRequest(request, completion: { (response, data, connectionError) -> Void in
+                })
+            }
+        })
+    }
+    
+//    func nsdataToJSON (data: NSData) -> AnyObject? {
+//        do {
+//            return try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers)
+//        } catch let myJSONError {
+//            print(myJSONError)
+//        }
+//        return nil
+//    }
+}
 
 extension CameraViewController {
     
@@ -602,11 +654,24 @@ extension CameraViewController {
                     // The sample buffer is not retained. Create image data before saving the still image to the photo library asynchronously.
                     let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataSampleBuffer)
                     
-                    //tweet
-//                    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-                    //TODO: - Post to Twitter and Facebook via Alamofire
-                    //facebook
-//                    FBSDKShareAPI.shareWithContent(<#T##content: FBSDKSharingContent!##FBSDKSharingContent!#>, delegate: <#T##FBSDKSharingDelegate!#>)
+                    //MARK: - Post Tweet
+                    if Twitter.sharedInstance().sessionStore.session() != nil {
+                        self.tweetWithContent(self.postTextView.text, tweetImage: imageData)
+                    }
+                    
+                    //MARK: - Post to Facebook
+                    if FBSDKAccessToken.currentAccessToken() != nil {
+                        let image = UIImage(data: imageData)
+                        
+                        let fbContent = FBSDKSharePhotoContent()
+                        
+                        let fbPhoto = FBSDKSharePhoto(image: image, userGenerated: true)
+                        fbPhoto.caption = self.postTextView.text
+                        
+                        fbContent.photos = [fbPhoto]
+                        FBSDKShareAPI.shareWithContent(fbContent, delegate: self)
+                    }
+
                     
                     dispatch_async(dispatch_get_main_queue()) {
                         self.postTextView.text.removeAll()

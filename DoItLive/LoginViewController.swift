@@ -25,7 +25,7 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
         logInButtonFacebook = FBSDKLoginButton()
         logInButtonFacebook.delegate = self
         logInButtonFacebook.readPermissions = ["public_profile", "email", "user_friends"] //could be handy in the future to grab more info like this, public profile is default setting
-        
+        logInButtonFacebook.publishPermissions =  ["publish_actions"] //so we can post
 
         logInButton = TWTRLogInButton { (session, error) in
             if let unwrappedSession = session {
@@ -40,7 +40,6 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
             }
         }
         
-        // TODO: Change where the log in button is positioned in your view
         logInButton.center = self.view.center
         self.view.addSubview(logInButton)
         
