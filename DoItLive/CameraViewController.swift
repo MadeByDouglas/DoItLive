@@ -106,12 +106,12 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         //tweet
         if let savedTweet = NSUserDefaults.standardUserDefaults().stringForKey(UserDefaultsKeys.savedTweet.rawValue) {
             if savedTweet == "" || savedTweet == " " {
-                postTextView.text = App.Hashtag.rawValue
+                postTextView.text = ""
             } else {
                 postTextView.text = savedTweet
             }
         } else {
-            postTextView.text = App.Hashtag.rawValue
+            postTextView.text = ""
         }
     }
     
@@ -675,7 +675,7 @@ extension CameraViewController {
                     
                     dispatch_async(dispatch_get_main_queue()) {
                         self.postTextView.text.removeAll()
-                        self.postTextView.text = App.Hashtag.rawValue
+                        self.postTextView.text = ""
                         if let currentText = self.postTextView.text {
                             let remainingCharacters = 140 - currentText.characters.count
                             self.postCountLabel.text = "Characters left: \(remainingCharacters.description)"
