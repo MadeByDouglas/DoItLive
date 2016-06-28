@@ -19,6 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
     var twitterUserName: String?
+    var facebookUserName: String?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 
@@ -60,14 +61,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             twitterUserName = session.userName
             NSUserDefaults.standardUserDefaults().setObject(session.userName, forKey: "twitterUserName")
             
+            handleAuth()
         }
         
-        if let result = facebookResult {
-            Answers.logLoginWithMethod("Facebook", success: true, customAttributes: ["UserID":result.token.userID])
-            logUser(result.token.userID, userName: nil, userEmail: nil)
+        if let loginResult = facebookResult {
+            Answers.logLoginWithMethod("Facebook", success: true, customAttributes: ["UserID":loginResult.token.userID])
+            logUser(loginResult.token.userID, userName: nil, userEmail: nil)
+            
+            let parameters = ["fields":"id, first_name, email"]
+            FBSDKGraphRequest.init(graphPath: "me", parameters: parameters).startWithCompletionHandler({ (connection, result, error) in
+                
+                if let error = error {
+                    print(error)
+                    
+                } else if let result = result {
+                    if let firstName = result.valueForKey("first_name") as? String {
+                        self.facebookUserName = firstName
+                        NSUserDefaults.standardUserDefaults().setObject(firstName, forKey: "facebookUserName")
+                    }
+                }
+                
+                self.handleAuth()
+            })
         }
-        
-        handleAuth()
     }
     
     func appLogout() {
@@ -75,7 +91,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Twitter.sharedInstance().sessionStore.logOutUserID(userID)
             NSUserDefaults.standardUserDefaults().removeObjectForKey("twitterUserName")
         }
-        FBSDKLoginManager().logOut()
+        
+        if FBSDKAccessToken.currentAccessToken() != nil {
+            FBSDKLoginManager().logOut()
+            NSUserDefaults.standardUserDefaults().removeObjectForKey("facebookUserName")
+        }
         
         logUser(nil, userName: nil, userEmail: nil)
 
@@ -93,7 +113,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 twitterUserName = userName
             }
             
-            //TODO: make graph request to get facebook name
+            if let firstName = NSUserDefaults.standardUserDefaults().objectForKey("facebookUserName") as? String {
+                facebookUserName = firstName
+            }
             
             window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.NavFeed.rawValue)
 

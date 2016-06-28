@@ -76,12 +76,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     override func viewDidLoad() {
         super.viewDidLoad()
         postTextView.delegate = self
-        if let _ = Twitter.sharedInstance().sessionStore.session()?.userID {
-            let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-            if let userName = appDelegate.twitterUserName {
-                userNameLabel.text = "@\(userName)"
-            }
-        }
+
         newPhotoReady = false
         
         // Disable UI. The UI is enabled if and only if the session starts running.
@@ -94,6 +89,19 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         // Photos
 //        PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
         
+        //display user info
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+
+        if Twitter.sharedInstance().sessionStore.session()?.userID != nil {
+            if let userName = appDelegate.twitterUserName {
+                userNameLabel.text = "@\(userName)"
+            }
+        }
+        if FBSDKAccessToken.currentAccessToken() != nil {
+            if let name = appDelegate.facebookUserName {
+                userNameLabel.text = name
+            }
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -166,24 +174,37 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         }
     }
     
-    func showTwitterMenu() {
+    func showOptionsMenu() {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
         alertController.modalPresentationStyle = UIModalPresentationStyle.Popover
         
-        alertController.addAction(UIAlertAction(title: "Twitter Feed", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
-            guard let userName = Twitter.sharedInstance().sessionStore.session()?.userID else {
-                return
-            }
-            if UIApplication.sharedApplication().canOpenURL(NSURL(string: "twitter://")!) {
-                let twitterProfileURL = NSURL(string: "twitter:///\(userName)")
-                UIApplication.sharedApplication().openURL(twitterProfileURL!)
+        if let twitterUser = Twitter.sharedInstance().sessionStore.session()?.userID {
+            alertController.addAction(UIAlertAction(title: "Twitter Feed", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
                 
-            } else {
-                let twitterProfileURL = NSURL(string: "https://twitter.com/\(userName)")
-                UIApplication.sharedApplication().openURL(twitterProfileURL!)
-            }
-        }))
+                if UIApplication.sharedApplication().canOpenURL(NSURL(string: "twitter://")!) {
+                    let twitterProfileURL = NSURL(string: "twitter:///\(twitterUser)")
+                    UIApplication.sharedApplication().openURL(twitterProfileURL!)
+                    
+                } else {
+                    let twitterProfileURL = NSURL(string: "https://twitter.com/\(twitterUser)")
+                    UIApplication.sharedApplication().openURL(twitterProfileURL!)
+                }
+            }))
+        }
         
+        if let facebookUser = FBSDKAccessToken.currentAccessToken().userID {
+            alertController.addAction(UIAlertAction(title: "Facebook Wall", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
+
+                if UIApplication.sharedApplication().canOpenURL(NSURL(string: "fb://")!) {
+                    let facebookProfileURL = NSURL(string: "fb://profile/\(facebookUser)")
+                    UIApplication.sharedApplication().openURL(facebookProfileURL!)
+                } else {
+                    let facebookProfileURL = NSURL(string: "https://facebook.com/\(facebookUser)")
+                    UIApplication.sharedApplication().openURL(facebookProfileURL!)
+                }
+            }))
+        }
+
         alertController.addAction(UIAlertAction(title: "Log Out", style: UIAlertActionStyle.Destructive, handler: { (action: UIAlertAction ) -> Void in
             NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
             self.dismissViewControllerAnimated(true) {
@@ -215,7 +236,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     @IBAction func didTapFeed(sender: UIButton) {
         
-        showTwitterMenu()
+        showOptionsMenu()
         
 //        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
 //        self.dismissViewControllerAnimated(true, completion: nil)
@@ -551,8 +572,13 @@ extension CameraViewController {
     
     func activateCamera() {
         //Handle iOS authorization and activate camera as appropriate
+        guard let queue = sessionQueue else {
+            self.sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL)
+            activateCamera()
+            return
+        }
         
-        dispatch_async(self.sessionQueue) {
+        dispatch_async(queue) {
             switch self.setupResult {
             case .Success:
                 // Only setup observers and start the session running if setup succeeded.
@@ -819,7 +845,12 @@ extension CameraViewController {
     }
     
     func resumeSession() {
-        dispatch_async(self.sessionQueue) {
+        guard let queue = sessionQueue else {
+            self.sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL)
+            resumeSession()
+            return
+        }
+        dispatch_async(queue) {
             // The session might fail to start running, e.g., if a phone or FaceTime call is still using audio or video.
             // A failure to start the session running will be communicated via a session runtime error notification.
             // To avoid repeatedly failing to start the session running, we only try to restart the session running in the
