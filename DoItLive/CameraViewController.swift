@@ -192,7 +192,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
             }))
         }
         
-        if let facebookUser = FBSDKAccessToken.currentAccessToken().userID {
+        if let facebookUser = FBSDKAccessToken.currentAccessToken()?.userID {
             alertController.addAction(UIAlertAction(title: "Facebook Wall", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
 
                 if UIApplication.sharedApplication().canOpenURL(NSURL(string: "fb://")!) {
