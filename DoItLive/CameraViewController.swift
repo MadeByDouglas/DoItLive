@@ -196,7 +196,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
             alertController.addAction(UIAlertAction(title: "Facebook Wall", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
 
                 if UIApplication.sharedApplication().canOpenURL(NSURL(string: "fb://")!) {
-                    let facebookProfileURL = NSURL(string: "fb://profile/\(facebookUser)")
+                    let facebookProfileURL = NSURL(string: "fb://profile?app_scoped_user_id=\(facebookUser)")
                     UIApplication.sharedApplication().openURL(facebookProfileURL!)
                 } else {
                     let facebookProfileURL = NSURL(string: "https://facebook.com/\(facebookUser)")
