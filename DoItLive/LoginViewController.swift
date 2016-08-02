@@ -15,13 +15,15 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
     
     @IBOutlet weak var termsButton: UIButton!
     @IBOutlet weak var acceptSwitch: UISwitch!
+    @IBOutlet weak var spinningView: RayView!
+    @IBOutlet weak var logoImageView: UIImageView!
+    
     var logInButton: TWTRLogInButton!
     var logInButtonFacebook: FBSDKLoginButton!
 
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.addSubview(spinningView)
         
         logInButtonFacebook = FBSDKLoginButton()
         logInButtonFacebook.delegate = self
@@ -42,25 +44,27 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
         }
         
         logInButton.center = self.view.center
+        logInButton.center.y = self.view.center.y + 80
         self.view.addSubview(logInButton)
         
         logInButtonFacebook.frame = logInButton.frame
         logInButtonFacebook.titleLabel?.font = logInButton.titleLabel?.font
-        logInButtonFacebook.center.y = self.view.center.y - 60
+        logInButtonFacebook.center.y = logInButton.center.y + 60
         self.view.addSubview(logInButtonFacebook)
     }
     
-    lazy var spinningView: UIView = {
-       let view = UIView(frame: CGRect(x: 40, y: 40, width: 80, height: 80))
-        view.backgroundColor = UIColor.blueColor()
-        view.rotate360Degrees()
-        return view
-    }()
-    
     override func viewWillAppear(animated: Bool) {
+        spinningView.rotate360Degrees()
+
         logInButton.enabled = acceptSwitch.on
         logInButtonFacebook.enabled = acceptSwitch.on
         spinningView.hidden = !acceptSwitch.on
+        logoImageView.hidden = !acceptSwitch.on
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        spinningView.stopRotating()
     }
 
     override func didReceiveMemoryWarning() {
@@ -88,11 +92,13 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
         logInButton.enabled = acceptSwitch.on
         logInButtonFacebook.enabled = acceptSwitch.on
         spinningView.hidden = !acceptSwitch.on
+        logoImageView.hidden = !acceptSwitch.on
     }
     
     @IBAction func didTapTerms(sender: UIButton) {
         let quickLook = QLPreviewController()
         quickLook.dataSource = self
+        spinningView.stopRotating()
         presentViewController(quickLook, animated: true, completion: nil)
     }
     

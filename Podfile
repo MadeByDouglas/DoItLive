@@ -20,6 +20,8 @@ pod 'FBSDKLoginKit'
 pod 'Alamofire'
 pod 'SwiftyJSON'
 
-pod "SAConfettiView"
+pod 'SAConfettiView'
+pod 'JFMinimalNotifications'
+pod 'Hue'
 
 end

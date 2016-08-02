@@ -15,6 +15,8 @@ PODS:
     - FBSDKCoreKit
   - FBSDKShareKit (4.13.1):
     - FBSDKCoreKit
+  - Hue (1.1.1)
+  - JFMinimalNotifications (0.0.7)
   - SAConfettiView (0.1.8)
   - SwiftyJSON (2.3.2)
   - TwitterCore (2.3.0):
@@ -30,6 +32,8 @@ DEPENDENCIES:
   - FBSDKCoreKit
   - FBSDKLoginKit
   - FBSDKShareKit
+  - Hue
+  - JFMinimalNotifications
   - SAConfettiView
   - SwiftyJSON
   - TwitterKit
@@ -42,11 +46,13 @@ SPEC CHECKSUMS:
   FBSDKCoreKit: 2807fe0da2ddb49a1469da6d6ff597f99912980f
   FBSDKLoginKit: 6d350cb6a22d6956e9d078885de6ee8a0ebc51b4
   FBSDKShareKit: c9438df7573b33780ac8c3451201c5ebb260ffca
+  Hue: 931aeeadcb29ce5de5b97589aa936be4638a1501
+  JFMinimalNotifications: 6a879b44489bc58fa2bc17619ff7c5ddf2502856
   SAConfettiView: c87031a2280659261b730fce3669fb10e73636ee
   SwiftyJSON: 04ccea08915aa0109039157c7974cf0298da292a
   TwitterCore: 817eae3e291fa4125b47789e26a4f6f024115c1f
   TwitterKit: 8a383da8d9c21b0423716381ea8bbfce20622d91
 
-PODFILE CHECKSUM: b858b86e2f10143a2bee9cba2d60509218bf439a
+PODFILE CHECKSUM: 2609c1a85e7e6083722872e9085f7db3022309a0
 
 COCOAPODS: 1.0.0

@@ -13,6 +13,7 @@ import TwitterKit
 import FBSDKShareKit
 import SwiftyJSON
 import SAConfettiView
+import JFMinimalNotifications
 
 private var CapturingStillImageContext = UnsafeMutablePointer<Void>.alloc(1)
 private var SessionRunningContext = UnsafeMutablePointer<Void>.alloc(1)
@@ -40,6 +41,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     @IBOutlet weak var postTapLabel: UILabel!
     @IBOutlet weak var postCountLabel: UILabel!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var networkIndicator: UIActivityIndicatorView!
     
     @IBOutlet weak var shutterButton: UIButton!
     @IBOutlet weak var switchButton: UIButton!
@@ -72,10 +74,23 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     var photosData = Photos()
    
     // Visual Effects
-    let confettiView: SAConfettiView = {
-      let view = SAConfettiView()
+    lazy var confettiView: SAConfettiView = {
+      let view = SAConfettiView(frame: self.view.bounds)
+        view.userInteractionEnabled = false
         return view
     }()
+    
+    lazy var successNotify: JFMinimalNotification = {
+        let notify = JFMinimalNotification(style: .Success, title: "Success!", subTitle: "Your photo is now LIVE", dismissalDelay: 1.5)
+        return notify
+    }()
+    
+    lazy var errorNotify: JFMinimalNotification = {
+        let notify = JFMinimalNotification(style: .Error, title: "Whoops!", subTitle: "Something went wrong, check your network connection", dismissalDelay: 1.5)
+        return notify
+    }()
+    
+    var timer: NSTimer?
     
     //Sound Effects
     var player: AVAudioPlayer?
@@ -98,9 +113,9 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        confettiView.frame = self.view.bounds
-        confettiView.userInteractionEnabled = false
         self.view.addSubview(confettiView)
+        self.view.addSubview(successNotify)
+        self.view.addSubview(errorNotify)
         
         postTextView.delegate = self
 
@@ -175,7 +190,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     }
     
 //    deinit {
-//        PHPhotoLibrary.sharedPhotoLibrary().unregisterChangeObserver(self)
+////        PHPhotoLibrary.sharedPhotoLibrary().unregisterChangeObserver(self)
 //        print("camera was deinit")
 //    }
     
@@ -382,17 +397,44 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
 
 extension CameraViewController: FBSDKSharingDelegate {
     func sharer(sharer: FBSDKSharing!, didCompleteWithResults results: [NSObject : AnyObject]!) {
-        //TODO: - Show happy animation
-        confettiView.startConfetti()
+        networkIndicator.stopAnimating()
+        celebrate()
     }
     
     func sharer(sharer: FBSDKSharing!, didFailWithError error: NSError!) {
-        //TODO: show sad pop up message
+        networkIndicator.stopAnimating()
+        showNetworkError()
         print(error)
     }
     
     func sharerDidCancel(sharer: FBSDKSharing!) {
         //probably shouldn't ever happen
+        networkIndicator.stopAnimating()
+    }
+    
+    func celebrate() {
+
+        successNotify.show()
+        
+        if confettiView.isActive() {
+            confettiView.stopConfetti()
+        }
+        
+        if timer != nil {
+            timer?.invalidate()
+        }
+        
+        self.confettiView.startConfetti()
+        timer = NSTimer.scheduledTimerWithTimeInterval(1.5, target: self, selector: #selector(endCelebrate(_:)), userInfo: nil, repeats: false)
+    }
+    
+    func endCelebrate(sender: NSTimer) {
+        self.confettiView.stopConfetti()
+        sender.invalidate()
+    }
+    
+    func showNetworkError() {
+        errorNotify.show()
     }
     
 
@@ -416,11 +458,16 @@ extension CameraViewController: FBSDKSharingDelegate {
                     URL: updateUrl, parameters: message, error:nil)
                 
                 client.sendTwitterRequest(request, completion: { (response, data, connectionError) -> Void in
+                    self.networkIndicator.stopAnimating()
                     if connectionError == nil {
-                        self.confettiView.startConfetti()
+                        self.celebrate()
+                    } else {
+                        self.showNetworkError()
                     }
                 
                 })
+            } else {
+                self.networkIndicator.stopAnimating()
             }
         })
     }
@@ -716,6 +763,8 @@ extension CameraViewController {
                     // The sample buffer is not retained. Create image data before saving the still image to the photo library asynchronously.
                     let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataSampleBuffer)
                     
+                    self.networkIndicator.startAnimating()
+
                     //MARK: - Post Tweet
                     if Twitter.sharedInstance().sessionStore.session() != nil {
                         self.tweetWithContent(self.postTextView.text, tweetImage: imageData)

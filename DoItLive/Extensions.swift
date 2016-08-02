@@ -8,6 +8,7 @@
 
 import UIKit
 import Photos
+import Hue
 
 extension UIBarButtonItem {
     func hide(sender: Bool) {
@@ -66,6 +67,12 @@ extension UIImage {
     }
 }
 
+extension UIColor {
+    static func twitterBlue() -> UIColor {
+        return UIColor.hex("#55acee")
+    }
+}
+
 extension NSIndexSet {
     
     func aapl_indexPathsFromIndexesWithSection(section: Int) -> [NSIndexPath] {
@@ -115,7 +122,13 @@ extension UIView {
 //        if let delegate: AnyObject = completionDelegate {
 //            rotateAnimation.delegate = delegate
 //        }
-        self.layer.addAnimation(rotateAnimation, forKey: nil)
+        self.layer.addAnimation(rotateAnimation, forKey: "rotate")
+    }
+    
+    func stopRotating() {
+        if self.layer.animationForKey("rotate") != nil {
+            self.layer.removeAnimationForKey("rotate")
+        }
     }
     
     func makeCircle() {
