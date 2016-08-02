@@ -37,6 +37,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     @IBOutlet weak var userNameLabel: UILabel!
     @IBOutlet weak var postTextView: UITextView!
+    @IBOutlet weak var postTapLabel: UILabel!
     @IBOutlet weak var postCountLabel: UILabel!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
@@ -330,6 +331,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     }
     
     func textViewDidBeginEditing(textView: UITextView) {
+        postTapLabel.hidden = true
         if let currentText = textView.text {
             let remainingCharacters = 140 - currentText.characters.count
             postCountLabel.text = "Characters left: \(remainingCharacters.description)"
@@ -337,6 +339,9 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     }
     
     func textViewDidEndEditing(textView: UITextView) {
+        if textView.text == nil || textView.text == "" {
+            postTapLabel.hidden = false
+        }
         textView.resignFirstResponder()
         let tweet = textView.text
         NSUserDefaults.standardUserDefaults().setObject(tweet, forKey: UserDefaultsKeys.savedTweet.rawValue)
