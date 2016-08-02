@@ -20,4 +20,6 @@ pod 'FBSDKLoginKit'
 pod 'Alamofire'
 pod 'SwiftyJSON'
 
+pod "SAConfettiView"
+
 end

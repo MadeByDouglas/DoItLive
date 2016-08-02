@@ -12,6 +12,7 @@ import Photos
 import TwitterKit
 import FBSDKShareKit
 import SwiftyJSON
+import SAConfettiView
 
 private var CapturingStillImageContext = UnsafeMutablePointer<Void>.alloc(1)
 private var SessionRunningContext = UnsafeMutablePointer<Void>.alloc(1)
@@ -69,6 +70,12 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     // Photos
     var photosData = Photos()
    
+    // Visual Effects
+    let confettiView: SAConfettiView = {
+      let view = SAConfettiView()
+        return view
+    }()
+    
     //Sound Effects
     var player: AVAudioPlayer?
     
@@ -90,6 +97,10 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        confettiView.frame = self.view.bounds
+        confettiView.userInteractionEnabled = false
+        self.view.addSubview(confettiView)
+        
         postTextView.delegate = self
 
         newPhotoReady = false
@@ -367,6 +378,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
 extension CameraViewController: FBSDKSharingDelegate {
     func sharer(sharer: FBSDKSharing!, didCompleteWithResults results: [NSObject : AnyObject]!) {
         //TODO: - Show happy animation
+        confettiView.startConfetti()
     }
     
     func sharer(sharer: FBSDKSharing!, didFailWithError error: NSError!) {
@@ -399,6 +411,10 @@ extension CameraViewController: FBSDKSharingDelegate {
                     URL: updateUrl, parameters: message, error:nil)
                 
                 client.sendTwitterRequest(request, completion: { (response, data, connectionError) -> Void in
+                    if connectionError == nil {
+                        self.confettiView.startConfetti()
+                    }
+                
                 })
             }
         })
