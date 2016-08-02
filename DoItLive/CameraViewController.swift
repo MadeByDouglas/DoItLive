@@ -68,8 +68,23 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     // Photos
     var photosData = Photos()
+   
+    //Sound Effects
+    var player: AVAudioPlayer?
     
-    
+    func playHawkCry() {
+        let url = NSBundle.mainBundle().URLForResource("Hawk-sound", withExtension: "mp3")!
+        
+        do {
+            player = try AVAudioPlayer(contentsOfURL: url)
+            guard let player = player else { return }
+            
+            player.prepareToPlay()
+            player.play()
+        } catch let error as NSError {
+            print(error.description)
+        }
+    }
     
     //MARK: Loading View
     
