@@ -1085,9 +1085,9 @@ extension CameraViewController {
                 }
             }
             
-            dispatch_async(dispatch_get_main_queue()) {
-                self.enableUI(!isCapturingStillImage)
-            }
+//            dispatch_async(dispatch_get_main_queue()) {
+//                self.enableUI(!isCapturingStillImage)
+//            }
             
         case SessionRunningContext:
             let isSessionRunning = change![NSKeyValueChangeNewKey]! as! Bool
