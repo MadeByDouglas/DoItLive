@@ -95,8 +95,8 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     //Sound Effects
     var player: AVAudioPlayer?
     
-    func playHawkCry() {
-        let url = NSBundle.mainBundle().URLForResource("Hawk-sound", withExtension: "mp3")!
+    func playSoundFile(name: String) {
+        let url = NSBundle.mainBundle().URLForResource(name, withExtension: "mp3")!
         
         do {
             player = try AVAudioPlayer(contentsOfURL: url)
@@ -415,6 +415,7 @@ extension CameraViewController: FBSDKSharingDelegate {
     func celebrate() {
 
         successNotify.show()
+        playSoundFile("yay")
         
         if confettiView.isActive() {
             confettiView.stopConfetti()
@@ -704,6 +705,7 @@ extension CameraViewController {
             break
         case .NotDetermined:
             print ("photos not determined")
+            dispatch_suspend(self.sessionQueue)
             PHPhotoLibrary.requestAuthorization({ (status: PHAuthorizationStatus) -> Void in
                 if status == PHAuthorizationStatus.Authorized {
                     
@@ -713,6 +715,8 @@ extension CameraViewController {
                     // call method again to check and use denied / restricted messages we already have made
                     self.authorizePhotos()
                 }
+                
+                dispatch_resume(self.sessionQueue)
             })
         }
     }

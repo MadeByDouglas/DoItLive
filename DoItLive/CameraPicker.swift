@@ -53,7 +53,7 @@ extension  CameraPicker: CameraViewControllerDelegate {
         let storyboard = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil)
         let cameraVC = storyboard.instantiateViewControllerWithIdentifier(ViewControllerID.Camera.rawValue) as! CameraViewController
         cameraVC.delegate = self
-        cameraVC.playHawkCry()
+        cameraVC.playSoundFile("hawk")
         return cameraVC
     }
     
