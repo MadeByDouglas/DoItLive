@@ -13,7 +13,7 @@ class Photos: NSObject {
     // Photos fetch
     let fetchLimit = 10
     
-    var assetsFetchResults: PHFetchResult?
+    var assetsFetchResults: PHFetchResult<AnyObject>?
     static var imageManager: PHCachingImageManager?
     
     var previousPreheatRect: CGRect = CGRect()
@@ -23,7 +23,7 @@ class Photos: NSObject {
     override init() {
         super.init()
         
-        if PHPhotoLibrary.authorizationStatus() == .Authorized {
+        if PHPhotoLibrary.authorizationStatus() == .authorized {
             setupPhotos()
         } else {
             //will be handled in viewWillAppear
@@ -44,14 +44,14 @@ class Photos: NSObject {
         
         Photos.imageManager = PHCachingImageManager()
         self.resetCachedAssets()
-        self.assetsFetchResults = PHAsset.fetchAssetsWithMediaType(PHAssetMediaType.Image, options: fetchOptions)
+        self.assetsFetchResults = PHAsset.fetchAssets(with: PHAssetMediaType.image, options: fetchOptions) as? PHFetchResult<AnyObject>
         
         
     }
     
     
     func numberOfItems() -> Int {
-        if PHPhotoLibrary.authorizationStatus() == .Authorized {
+        if PHPhotoLibrary.authorizationStatus() == .authorized {
             if let images = self.assetsFetchResults?.count {
                 if #available(iOS 9.0, *) {
                     return images
@@ -79,28 +79,28 @@ class Photos: NSObject {
     
     func resetCachedAssets() {
         Photos.imageManager?.stopCachingImagesForAllAssets()
-        self.previousPreheatRect = CGRectZero
+        self.previousPreheatRect = CGRect.zero
     }
     
-    func updateCachedAssetsForCollectionView(collectionView: UICollectionView, view: UIView, isLoaded: Bool) {
+    func updateCachedAssetsForCollectionView(_ collectionView: UICollectionView, view: UIView, isLoaded: Bool) {
         guard isLoaded && view.window != nil else {
             return
         }
         
         // The preheat window is twice the height of the visible rect.
         var preheatRect = collectionView.bounds
-        preheatRect = CGRectInset(preheatRect, 0.0, -0.5 * CGRectGetHeight(preheatRect))
+        preheatRect = preheatRect.insetBy(dx: 0.0, dy: -0.5 * preheatRect.height)
         
         /*
         Check if the collection view is showing an area that is significantly
         different to the last preheated area.
         */
-        let delta = abs(CGRectGetMidY(preheatRect) - CGRectGetMidY(self.previousPreheatRect))
-        if delta > CGRectGetHeight(collectionView.bounds) / 3.0 {
+        let delta = abs(preheatRect.midY - self.previousPreheatRect.midY)
+        if delta > collectionView.bounds.height / 3.0 {
             
             // Compute the assets to start caching and to stop caching.
-            var addedIndexPaths: [NSIndexPath] = []
-            var removedIndexPaths: [NSIndexPath] = []
+            var addedIndexPaths: [IndexPath] = []
+            var removedIndexPaths: [IndexPath] = []
             
             self.computeDifferenceBetweenRect(self.previousPreheatRect, andRect: preheatRect, removedHandler: {removedRect in
                 let indexPaths = collectionView.aapl_indexPathsForElementsInRect(removedRect)
@@ -114,13 +114,13 @@ class Photos: NSObject {
             let assetsToStopCaching = self.assetsAtIndexPaths(removedIndexPaths)
             
             // Update the assets the PHCachingImageManager is caching.
-            Photos.imageManager?.startCachingImagesForAssets(assetsToStartCaching,
+            Photos.imageManager?.startCachingImages(for: assetsToStartCaching,
                 targetSize: Photos.AssetGridThumbnailSize,
-                contentMode: PHImageContentMode.AspectFill,
+                contentMode: PHImageContentMode.aspectFill,
                 options: nil)
-            Photos.imageManager?.stopCachingImagesForAssets(assetsToStopCaching,
+            Photos.imageManager?.stopCachingImages(for: assetsToStopCaching,
                 targetSize: Photos.AssetGridThumbnailSize,
-                contentMode: PHImageContentMode.AspectFill,
+                contentMode: PHImageContentMode.aspectFill,
                 options: nil)
             
             // Store the preheat rect to compare against in the future.
@@ -128,30 +128,30 @@ class Photos: NSObject {
         }
     }
     
-    private func computeDifferenceBetweenRect(oldRect: CGRect, andRect newRect: CGRect, removedHandler: (CGRect)->Void, addedHandler: (CGRect)->Void) {
-        if CGRectIntersectsRect(newRect, oldRect) {
-            let oldMaxY = CGRectGetMaxY(oldRect)
-            let oldMinY = CGRectGetMinY(oldRect)
-            let newMaxY = CGRectGetMaxY(newRect)
-            let newMinY = CGRectGetMinY(newRect)
+    fileprivate func computeDifferenceBetweenRect(_ oldRect: CGRect, andRect newRect: CGRect, removedHandler: (CGRect)->Void, addedHandler: (CGRect)->Void) {
+        if newRect.intersects(oldRect) {
+            let oldMaxY = oldRect.maxY
+            let oldMinY = oldRect.minY
+            let newMaxY = newRect.maxY
+            let newMinY = newRect.minY
             
             if newMaxY > oldMaxY {
-                let rectToAdd = CGRectMake(newRect.origin.x, oldMaxY, newRect.size.width, (newMaxY - oldMaxY))
+                let rectToAdd = CGRect(x: newRect.origin.x, y: oldMaxY, width: newRect.size.width, height: (newMaxY - oldMaxY))
                 addedHandler(rectToAdd)
             }
             
             if oldMinY > newMinY {
-                let rectToAdd = CGRectMake(newRect.origin.x, newMinY, newRect.size.width, (oldMinY - newMinY))
+                let rectToAdd = CGRect(x: newRect.origin.x, y: newMinY, width: newRect.size.width, height: (oldMinY - newMinY))
                 addedHandler(rectToAdd)
             }
             
             if newMaxY < oldMaxY {
-                let rectToRemove = CGRectMake(newRect.origin.x, newMaxY, newRect.size.width, (oldMaxY - newMaxY))
+                let rectToRemove = CGRect(x: newRect.origin.x, y: newMaxY, width: newRect.size.width, height: (oldMaxY - newMaxY))
                 removedHandler(rectToRemove)
             }
             
             if oldMinY < newMinY {
-                let rectToRemove = CGRectMake(newRect.origin.x, oldMinY, newRect.size.width, (newMinY - oldMinY))
+                let rectToRemove = CGRect(x: newRect.origin.x, y: oldMinY, width: newRect.size.width, height: (newMinY - oldMinY))
                 removedHandler(rectToRemove)
             }
         } else {
@@ -160,7 +160,7 @@ class Photos: NSObject {
         }
     }
     
-    private func assetsAtIndexPaths(indexPaths: [NSIndexPath]) -> [PHAsset] {
+    fileprivate func assetsAtIndexPaths(_ indexPaths: [IndexPath]) -> [PHAsset] {
         
         let assets = indexPaths.map{self.assetsFetchResults![$0.item] as! PHAsset}
         

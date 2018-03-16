@@ -14,12 +14,12 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     @IBOutlet weak var logoutBarButton: UIBarButtonItem!
     @IBOutlet weak var newPostBarButton: UIBarButtonItem!
     
-    @IBAction func didTapLogout(sender: UIBarButtonItem) {
+    @IBAction func didTapLogout(_ sender: UIBarButtonItem) {
         //log out notification
-        NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
+        NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Logout.rawValue), object: nil)
     }
     
-    @IBAction func didTapNewPost(sender: UIBarButtonItem) {
+    @IBAction func didTapNewPost(_ sender: UIBarButtonItem) {
         showCameraMenu()
     }
     
@@ -37,7 +37,7 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
 //        self.dataSource = userDataSource
 //        self.showTweetActions = true
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(FeedTableViewController.presentCamera), name: UIApplicationDidBecomeActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(FeedTableViewController.presentCamera), name: NSNotification.Name.UIApplicationDidBecomeActive, object: nil)
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -46,23 +46,23 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if NSUserDefaults.standardUserDefaults().boolForKey(UserDefaultsKeys.firstView.rawValue) == true {
+        if UserDefaults.standard.bool(forKey: UserDefaultsKeys.firstView.rawValue) == true {
             let cameraVC = self.camera.getCameraVC()
-            self.presentViewController(cameraVC, animated: true, completion: nil)
+            self.present(cameraVC, animated: true, completion: nil)
         }
     }
     
-    func presentCamera() {
-        if NSUserDefaults.standardUserDefaults().boolForKey(UserDefaultsKeys.firstView.rawValue) == true && self.isViewLoaded() == true && self.view.window != nil && self == self.navigationController?.visibleViewController {
+    @objc func presentCamera() {
+        if UserDefaults.standard.bool(forKey: UserDefaultsKeys.firstView.rawValue) == true && self.isViewLoaded == true && self.view.window != nil && self == self.navigationController?.visibleViewController {
             let cameraVC = self.camera.getCameraVC()
-            self.presentViewController(cameraVC, animated: true, completion: nil)
+            self.present(cameraVC, animated: true, completion: nil)
         }
     }
     
-    func implementReceivedImageAndText(image: UIImage, text: String) {
+    func implementReceivedImageAndText(_ image: UIImage, text: String) {
 //        let data = UIImageJPEGRepresentation(image, 0.5)
 //        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         //TODO: - post to Twitter and Facebook if I bring back the feed controller and delegate etc.
@@ -70,28 +70,28 @@ class FeedTableViewController: TWTRTimelineViewController, TWTRComposerViewContr
     
     // MARK: - Camera Menu
     func showCameraMenu() {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
-        alertController.modalPresentationStyle = UIModalPresentationStyle.Popover
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.actionSheet)
+        alertController.modalPresentationStyle = UIModalPresentationStyle.popover
         
-        alertController.addAction(UIAlertAction(title: "Photo Album", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
+        alertController.addAction(UIAlertAction(title: "Photo Album", style: UIAlertActionStyle.default, handler: { (action: UIAlertAction) -> Void in
             let imagePickerVC = self.camera.configureImagePickerController()
-            self.presentViewController(imagePickerVC, animated: true, completion: nil)
+            self.present(imagePickerVC, animated: true, completion: nil)
         }))
         
-        alertController.addAction(UIAlertAction(title: "Camera", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction ) -> Void in
+        alertController.addAction(UIAlertAction(title: "Camera", style: UIAlertActionStyle.default, handler: { (action: UIAlertAction ) -> Void in
             let cameraVC = self.camera.getCameraVC()
-            self.presentViewController(cameraVC, animated: true, completion: nil)
+            self.present(cameraVC, animated: true, completion: nil)
             
         }))
         //        alertController.addAction(UIAlertAction(title: "Video", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction ) -> Void in
         //
         //        }))
-        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: { (action: UIAlertAction) -> Void in
+        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: { (action: UIAlertAction) -> Void in
             
         }))
         
         if self.presentedViewController == nil {
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         } else {
             print("\(classForCoder).alertController something already presented")
         }

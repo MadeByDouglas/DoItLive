@@ -28,7 +28,7 @@ class PhotoCollectionViewCell: UICollectionViewCell {
     //        }
     //    }
     
-    private func didSetThumbnailImage(_: UIImage?) {
+    fileprivate func didSetThumbnailImage(_: UIImage?) {
         imageCellView.image = thumbnailImage
     }
     
@@ -47,24 +47,24 @@ class PhotoCollectionViewCell: UICollectionViewCell {
     //        self.livePhotoBadgeImageView.image = livePhotoBadgeImage
     //    }
     
-    func imageRequestOptions(asset: PHAsset) -> PHImageRequestOptions {
+    func imageRequestOptions(_ asset: PHAsset) -> PHImageRequestOptions {
         let cropToSquareOptions = PHImageRequestOptions()
-        cropToSquareOptions.resizeMode = PHImageRequestOptionsResizeMode.Exact
+        cropToSquareOptions.resizeMode = PHImageRequestOptionsResizeMode.exact
         let cropSideLength = CGFloat(min(asset.pixelWidth, asset.pixelHeight))
         var square = CGRect()
         
         if cropSideLength == CGFloat(asset.pixelWidth) {
             //portrait
             let startPoint = CGFloat(asset.pixelHeight / 2) - (cropSideLength / 2)
-            square = CGRectMake(0, startPoint, cropSideLength, cropSideLength)
+            square = CGRect(x: 0, y: startPoint, width: cropSideLength, height: cropSideLength)
             
         } else {
             //landscape
             let startPoint = CGFloat(asset.pixelWidth / 2) - (cropSideLength / 2)
-            square = CGRectMake(startPoint, 0, cropSideLength, cropSideLength)
+            square = CGRect(x: startPoint, y: 0, width: cropSideLength, height: cropSideLength)
         }
         
-        let cropRect = CGRectApplyAffineTransform(square, CGAffineTransformMakeScale(CGFloat(1 / asset.pixelWidth), CGFloat(1 / asset.pixelHeight)))
+        let cropRect = square.applying(CGAffineTransform(scaleX: CGFloat(1 / asset.pixelWidth), y: CGFloat(1 / asset.pixelHeight)))
         cropToSquareOptions.normalizedCropRect = cropRect
         return cropToSquareOptions
     }
@@ -73,11 +73,11 @@ class PhotoCollectionViewCell: UICollectionViewCell {
     
     
     
-    func configureWithAsset(asset: PHAsset) {
+    func configureWithAsset(_ asset: PHAsset) {
         
         self.layoutIfNeeded()
         
-        Photos.imageManager?.requestImageForAsset(asset, targetSize: Photos.AssetGridThumbnailSize, contentMode: .AspectFill, options: imageRequestOptions(asset), resultHandler: { (result, _) -> Void in
+        Photos.imageManager?.requestImage(for: asset, targetSize: Photos.AssetGridThumbnailSize, contentMode: .aspectFill, options: imageRequestOptions(asset), resultHandler: { (result, _) -> Void in
             
             // Set the cell's thumbnail image if it's still showing the same asset.
             if self.representedAssetIdentifier == asset.localIdentifier {
@@ -87,10 +87,10 @@ class PhotoCollectionViewCell: UICollectionViewCell {
         
         self.contentView.addSelectionLayer()
         
-        if self.selected {
-            self.contentView.layer.sublayers?.last?.hidden = false
+        if self.isSelected {
+            self.contentView.layer.sublayers?.last?.isHidden = false
         } else {
-            self.contentView.layer.sublayers?.last?.hidden = true
+            self.contentView.layer.sublayers?.last?.isHidden = true
         }
         
     }

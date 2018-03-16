@@ -15,14 +15,14 @@ class RayView: UIView {
     
     // Only override drawRect: if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         // Drawing code
-        let oval = UIBezierPath(ovalInRect: rect)
-        UIColor.clearColor().setFill()
+        let oval = UIBezierPath(ovalIn: rect)
+        UIColor.clear.setFill()
         oval.fill()
         
         let center = CGPoint(x:bounds.width/2, y: bounds.height/2)
-        let Pi = CGFloat(M_PI)
+        let Pi = CGFloat.pi
         
         let line = UIBezierPath()
         var edgePoints = [CGPoint]()
@@ -35,15 +35,15 @@ class RayView: UIView {
             edgePoints.append(point)
         }
 
-        for (i, point) in edgePoints.enumerate() {
-            line.moveToPoint(center)
-            line.addLineToPoint(point)
+        for (i, point) in edgePoints.enumerated() {
+            line.move(to: center)
+            line.addLine(to: point)
             line.lineWidth = 3
             UIColor.twitterBlue().setStroke()
             line.stroke()
             if i % 2 != 0 {
-                line.addQuadCurveToPoint(edgePoints[i-1], controlPoint: point)
-                line.closePath()
+                line.addQuadCurve(to: edgePoints[i-1], controlPoint: point)
+                line.close()
                 UIColor.twitterBlue().setFill()
                 line.fill()
             }

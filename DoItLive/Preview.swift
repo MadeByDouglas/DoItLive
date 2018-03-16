@@ -11,9 +11,9 @@ import AVFoundation
 
 class Preview: UIView {
 
-    private var _session: AVCaptureSession?
+    fileprivate var _session: AVCaptureSession?
     
-    override class func layerClass() -> AnyClass {
+    override class var layerClass : AnyClass {
         return AVCaptureVideoPreviewLayer.self
     }
     

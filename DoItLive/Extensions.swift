@@ -11,12 +11,12 @@ import Photos
 import Hue
 
 extension UIBarButtonItem {
-    func hide(sender: Bool) {
-        self.enabled = !sender
+    func hide(_ sender: Bool) {
+        self.isEnabled = !sender
         if sender == true {
-            self.tintColor = UIColor.clearColor()
+            self.tintColor = UIColor.clear
         } else {
-            self.tintColor = UIColor.whiteColor()
+            self.tintColor = UIColor.white
         }
     }
 }
@@ -25,15 +25,15 @@ extension UINavigationController {
     
     //New implementation to prevent autorotate yet allow camera to rotate for proper pictures
     //works across the app because everything is embedded in the UINavigationController
-    override public func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        return UIInterfaceOrientationMask.Portrait
+    override open var supportedInterfaceOrientations : UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.portrait
     }
     
 }
 
 extension PHAsset {
     
-    func getAdjustedSize(maxDimension: CGFloat)-> CGSize {
+    func getAdjustedSize(_ maxDimension: CGFloat)-> CGSize {
         let width = CGFloat(pixelWidth)
         let height = CGFloat(pixelHeight)
         var newWidth: CGFloat = 0
@@ -51,7 +51,7 @@ extension PHAsset {
 }
 
 extension UIImage {
-    func getAdjustedSize(maxDimension: CGFloat)-> CGSize {
+    func getAdjustedSize(_ maxDimension: CGFloat)-> CGSize {
         let height = size.height
         let width = size.width
         var newHeight: CGFloat = 0
@@ -69,19 +69,14 @@ extension UIImage {
 
 extension UIColor {
     static func twitterBlue() -> UIColor {
-        return UIColor.hex("#55acee")
+        return UIColor.init(hex: "#55acee")
     }
 }
 
-extension NSIndexSet {
+extension IndexSet {
     
-    func aapl_indexPathsFromIndexesWithSection(section: Int) -> [NSIndexPath] {
-        var indexPaths: [NSIndexPath] = []
-        indexPaths.reserveCapacity(self.count)
-        self.enumerateIndexesUsingBlock{idx, stop in
-            indexPaths.append(NSIndexPath(forItem: idx, inSection: section))
-        }
-        return indexPaths
+    func aapl_indexPathsFromIndexesWithSection(_ section: Int) -> [IndexPath] {
+        return self.map { IndexPath(item: $0, section: section) }
     }
     
 }
@@ -89,8 +84,8 @@ extension NSIndexSet {
 extension UICollectionView {
     
     //### returns empty Array, rather than nil, when no elements in rect.
-    func aapl_indexPathsForElementsInRect(rect: CGRect) -> [NSIndexPath] {
-        guard let allLayoutAttributes = self.collectionViewLayout.layoutAttributesForElementsInRect(rect)
+    func aapl_indexPathsForElementsInRect(_ rect: CGRect) -> [IndexPath] {
+        guard let allLayoutAttributes = self.collectionViewLayout.layoutAttributesForElements(in: rect)
             else {return []}
         let indexPaths = allLayoutAttributes.map{$0.indexPath}
         return indexPaths
@@ -99,14 +94,14 @@ extension UICollectionView {
 }
 
 extension UICollectionViewFlowLayout {
-    func cellsFitAcrossScreen(numberOfCells: Int, labelHeight: CGFloat) -> CGSize {
+    func cellsFitAcrossScreen(_ numberOfCells: Int, labelHeight: CGFloat) -> CGSize {
         //using information from flowLayout get proper spacing for cells across entire screen
         let insideMargin = self.minimumInteritemSpacing
         let outsideMargins = self.sectionInset.left + self.sectionInset.right
         let numberOfDivisions: Int = numberOfCells - 1
         let subtractionForMargins: CGFloat = insideMargin * CGFloat(numberOfDivisions) + outsideMargins
         
-        let fittedWidth = (UIScreen.mainScreen().bounds.width - subtractionForMargins) / CGFloat(numberOfCells)
+        let fittedWidth = (UIScreen.main.bounds.width - subtractionForMargins) / CGFloat(numberOfCells)
         return CGSize(width: fittedWidth, height: fittedWidth + labelHeight)
     }
 }
@@ -115,19 +110,19 @@ extension UIView {
     func rotate360Degrees() {
         let rotateAnimation = CABasicAnimation(keyPath: "transform.rotation")
         rotateAnimation.fromValue = 0.0
-        rotateAnimation.toValue = CGFloat(M_PI * 2.0)
+        rotateAnimation.toValue = CGFloat.pi * 2.0
         rotateAnimation.duration = 5
         rotateAnimation.repeatCount = Float.infinity
         
 //        if let delegate: AnyObject = completionDelegate {
 //            rotateAnimation.delegate = delegate
 //        }
-        self.layer.addAnimation(rotateAnimation, forKey: "rotate")
+        self.layer.add(rotateAnimation, forKey: "rotate")
     }
     
     func stopRotating() {
-        if self.layer.animationForKey("rotate") != nil {
-            self.layer.removeAnimationForKey("rotate")
+        if self.layer.animation(forKey: "rotate") != nil {
+            self.layer.removeAnimation(forKey: "rotate")
         }
     }
     
@@ -149,8 +144,8 @@ extension UIView {
     }
     
     func gradientDarkToClear() {
-        let colorTop = UIColor.clearColor().CGColor
-        let colorBottom = UIColor.blackColor().colorWithAlphaComponent(0.7).CGColor
+        let colorTop = UIColor.clear.cgColor
+        let colorBottom = UIColor.black.withAlphaComponent(0.7).cgColor
         
         let gl: CAGradientLayer
         

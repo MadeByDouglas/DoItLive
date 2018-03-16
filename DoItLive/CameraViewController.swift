@@ -15,17 +15,19 @@ import SwiftyJSON
 import SAConfettiView
 import JFMinimalNotifications
 
-private var CapturingStillImageContext = UnsafeMutablePointer<Void>.alloc(1)
-private var SessionRunningContext = UnsafeMutablePointer<Void>.alloc(1)
+let alignment = MemoryLayout<Int>.alignment
+
+private var CapturingStillImageContext = UnsafeMutableRawPointer.allocate(bytes: 1, alignedTo: alignment)
+private var SessionRunningContext = UnsafeMutableRawPointer.allocate(bytes: 1, alignedTo: alignment)
 
 private enum AVCamSetupResult: Int {
-    case Success
-    case CameraNotAuthorized
-    case SessionConfigurationFailed
+    case success
+    case cameraNotAuthorized
+    case sessionConfigurationFailed
 }
 
 protocol CameraViewControllerDelegate: class {
-    func cameraControllerDidSendAssetAndTweet(controller: CameraViewController, asset: PHAsset, tweet: String)
+    func cameraControllerDidSendAssetAndTweet(_ controller: CameraViewController, asset: PHAsset, tweet: String)
 }
 
 class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDelegate,*/ UITextViewDelegate {
@@ -49,16 +51,16 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     @IBOutlet weak var cameraUnavailableLabel: UILabel!
     
     // Session management.
-    private var sessionQueue: dispatch_queue_t!
-    private var session: AVCaptureSession!
-    private var videoDeviceInput: AVCaptureDeviceInput!
-    private var movieFileOutput: AVCaptureMovieFileOutput!
-    private var stillImageOutput: AVCaptureStillImageOutput!
+    fileprivate var sessionQueue: DispatchQueue!
+    fileprivate var session: AVCaptureSession!
+    fileprivate var videoDeviceInput: AVCaptureDeviceInput!
+    fileprivate var movieFileOutput: AVCaptureMovieFileOutput!
+    fileprivate var photoOutput: AVCapturePhotoOutput!
     
     // Utilities.
-    private var setupResult: AVCamSetupResult = .CameraNotAuthorized
-    private var sessionRunning: Bool = false
-    private var backgroundRecordingID: UIBackgroundTaskIdentifier = 0
+    fileprivate var setupResult: AVCamSetupResult = .cameraNotAuthorized
+    fileprivate var sessionRunning: Bool = false
+    fileprivate var backgroundRecordingID: UIBackgroundTaskIdentifier = 0
     let toggleAnimation = CATransition()
     var blurView: UIVisualEffectView!
     //    var cameraIsReady: Bool! //handled by KVO now
@@ -67,7 +69,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     var newPhotoReady: Bool!
     var didSendPhoto: Bool!
     
-    let defaults = NSUserDefaults.standardUserDefaults()
+    let defaults = UserDefaults.standard
     let firstInstantSwitch = "firstInstantSwitch"
     
     // Photos
@@ -76,30 +78,30 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     // Visual Effects
     lazy var confettiView: SAConfettiView = {
       let view = SAConfettiView(frame: self.view.bounds)
-        view.userInteractionEnabled = false
+        view.isUserInteractionEnabled = false
         return view
     }()
     
     lazy var successNotify: JFMinimalNotification = {
-        let notify = JFMinimalNotification(style: .Success, title: "Success!", subTitle: "Your photo is now LIVE", dismissalDelay: 1.5)
-        return notify
+        let notify = JFMinimalNotification(style: .success, title: "Success!", subTitle: "Your photo is now LIVE", dismissalDelay: 1.5)
+        return notify!
     }()
     
     lazy var errorNotify: JFMinimalNotification = {
-        let notify = JFMinimalNotification(style: .Error, title: "Whoops!", subTitle: "Something went wrong, check your network connection", dismissalDelay: 1.5)
-        return notify
+        let notify = JFMinimalNotification(style: .error, title: "Whoops!", subTitle: "Something went wrong, check your network connection", dismissalDelay: 1.5)
+        return notify!
     }()
     
-    var timer: NSTimer?
+    var timer: Timer?
     
     //Sound Effects
     var player: AVAudioPlayer?
     
-    func playSoundFile(name: String) {
-        let url = NSBundle.mainBundle().URLForResource(name, withExtension: "mp3")!
+    func playSoundFile(_ name: String) {
+        let url = Bundle.main.url(forResource: name, withExtension: "mp3")!
         
         do {
-            player = try AVAudioPlayer(contentsOfURL: url)
+            player = try AVAudioPlayer(contentsOf: url)
             guard let player = player else { return }
             
             player.prepareToPlay()
@@ -132,21 +134,21 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
 //        PHPhotoLibrary.sharedPhotoLibrary().registerChangeObserver(self)
         
         //display user info
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
 
-        if Twitter.sharedInstance().sessionStore.session()?.userID != nil {
+        if TWTRTwitter.sharedInstance().sessionStore.session()?.userID != nil {
             if let userName = appDelegate.twitterUserName {
                 userNameLabel.text = "@\(userName)"
             }
         }
-        if FBSDKAccessToken.currentAccessToken() != nil {
+        if FBSDKAccessToken.current() != nil {
             if let name = appDelegate.facebookUserName {
                 userNameLabel.text = name
             }
         }
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         didSendPhoto = false
@@ -154,7 +156,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         authorizePhotos()
         
         //tweet
-        if let savedTweet = NSUserDefaults.standardUserDefaults().stringForKey(UserDefaultsKeys.savedTweet.rawValue) {
+        if let savedTweet = UserDefaults.standard.string(forKey: UserDefaultsKeys.savedTweet.rawValue) {
             if savedTweet == "" || savedTweet == " " {
                 postTextView.text = ""
             } else {
@@ -165,7 +167,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         }
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         blurPreview(false)
         
@@ -173,15 +175,15 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     //MARK: Unloading View
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         blurPreview(true)
 
         super.viewWillDisappear(animated)
     }
     
-    override func viewDidDisappear(animated: Bool) {
-        dispatch_async(self.sessionQueue) {
-            if self.setupResult == AVCamSetupResult.Success {
+    override func viewDidDisappear(_ animated: Bool) {
+        self.sessionQueue.async {
+            if self.setupResult == AVCamSetupResult.success {
                 self.session.stopRunning()
                 self.removeCamObservers()
             }
@@ -196,71 +198,71 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     //MARK: View Preferences
     
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return true
     }
     
-    func blurPreview(sender: Bool) {
-        if self.setupResult == AVCamSetupResult.Success {
+    func blurPreview(_ sender: Bool) {
+        if self.setupResult == AVCamSetupResult.success {
             guard let _ = blurView else {
                 return
             }
             
-            UIView.animateWithDuration(0.3) { () -> Void in
+            UIView.animate(withDuration: 0.3, animations: { () -> Void in
                 if sender == true {
                     self.blurView.alpha = 1
                 } else {
                     self.blurView.alpha = 0
                 }
-            }
+            }) 
         }
     }
     
     func showOptionsMenu() {
-        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.ActionSheet)
-        alertController.modalPresentationStyle = UIModalPresentationStyle.Popover
+        let alertController = UIAlertController(title: nil, message: nil, preferredStyle: UIAlertControllerStyle.actionSheet)
+        alertController.modalPresentationStyle = UIModalPresentationStyle.popover
         
-        if let twitterUser = Twitter.sharedInstance().sessionStore.session()?.userID {
-            alertController.addAction(UIAlertAction(title: "Twitter Feed", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
+        if let twitterUser = TWTRTwitter.sharedInstance().sessionStore.session()?.userID {
+            alertController.addAction(UIAlertAction(title: "Twitter Feed", style: UIAlertActionStyle.default, handler: { (action: UIAlertAction) -> Void in
                 
-                if UIApplication.sharedApplication().canOpenURL(NSURL(string: "twitter://")!) {
-                    let twitterProfileURL = NSURL(string: "twitter:///\(twitterUser)")
-                    UIApplication.sharedApplication().openURL(twitterProfileURL!)
+                if UIApplication.shared.canOpenURL(URL(string: "twitter://")!) {
+                    let twitterProfileURL = URL(string: "twitter:///\(twitterUser)")
+                    UIApplication.shared.open(twitterProfileURL!, options: [:], completionHandler: nil)
                     
                 } else {
-                    let twitterProfileURL = NSURL(string: "https://twitter.com/\(twitterUser)")
-                    UIApplication.sharedApplication().openURL(twitterProfileURL!)
+                    let twitterProfileURL = URL(string: "https://twitter.com/\(twitterUser)")
+                    UIApplication.shared.open(twitterProfileURL!, options: [:], completionHandler: nil)
                 }
             }))
         }
         
-        if let facebookUser = FBSDKAccessToken.currentAccessToken()?.userID {
-            alertController.addAction(UIAlertAction(title: "Facebook Wall", style: UIAlertActionStyle.Default, handler: { (action: UIAlertAction) -> Void in
+        if let facebookUser = FBSDKAccessToken.current()?.userID {
+            alertController.addAction(UIAlertAction(title: "Facebook Wall", style: UIAlertActionStyle.default, handler: { (action: UIAlertAction) -> Void in
 
-                if UIApplication.sharedApplication().canOpenURL(NSURL(string: "fb://")!) {
-                    let facebookProfileURL = NSURL(string: "fb://profile?app_scoped_user_id=\(facebookUser)")
-                    UIApplication.sharedApplication().openURL(facebookProfileURL!)
+                if UIApplication.shared.canOpenURL(URL(string: "fb://")!) {
+                    let facebookProfileURL = URL(string: "fb://profile?app_scoped_user_id=\(facebookUser)")
+                    UIApplication.shared.open(facebookProfileURL!, options: [:], completionHandler: nil)
                 } else {
-                    let facebookProfileURL = NSURL(string: "https://facebook.com/\(facebookUser)")
-                    UIApplication.sharedApplication().openURL(facebookProfileURL!)
+                    let facebookProfileURL = URL(string: "https://facebook.com/\(facebookUser)")
+                    UIApplication.shared.open(facebookProfileURL!, options: [:], completionHandler: nil)
                 }
             }))
         }
 
-        alertController.addAction(UIAlertAction(title: "Log Out", style: UIAlertActionStyle.Destructive, handler: { (action: UIAlertAction ) -> Void in
-            NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
-            self.dismissViewControllerAnimated(true) {
+        alertController.addAction(UIAlertAction(title: "Log Out", style: UIAlertActionStyle.destructive, handler: { (action: UIAlertAction ) -> Void in
+            UserDefaults.standard.set(false, forKey: UserDefaultsKeys.firstView.rawValue)
+            self.dismiss(animated: true) {
                 //log out notification
-                NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
+                NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Logout.rawValue), object: nil)
             }
         }))
 
-        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: { (action: UIAlertAction) -> Void in
+        alertController.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: { (action: UIAlertAction) -> Void in
             
         }))
         
         if self.presentedViewController == nil {
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         } else {
             print("\(classForCoder).alertController something already presented")
         }
@@ -268,15 +270,15 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     
     //MARK: Buttons
     
-    @IBAction func didTapShutter(sender: UIButton) {
+    @IBAction func didTapShutter(_ sender: UIButton) {
         captureStillImage()
     }
     
-    @IBAction func didTapSwitchCamera(sender: UIButton) {
+    @IBAction func didTapSwitchCamera(_ sender: UIButton) {
         switchCameras()
     }
     
-    @IBAction func didTapFeed(sender: UIButton) {
+    @IBAction func didTapFeed(_ sender: UIButton) {
         
         showOptionsMenu()
         
@@ -284,25 +286,25 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
 //        self.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    @IBAction func didTapResume(sender: UIButton) {
+    @IBAction func didTapResume(_ sender: UIButton) {
         resumeSession()
     }
     
-    @IBAction func focusAndExposeTap(gestureRecognizer: UIGestureRecognizer) {
-        let devicePoint = (self.previewView.layer as! AVCaptureVideoPreviewLayer).captureDevicePointOfInterestForPoint(gestureRecognizer.locationInView(gestureRecognizer.view))
-        self.focusWithMode(AVCaptureFocusMode.AutoFocus, exposeWithMode: AVCaptureExposureMode.AutoExpose, atDevicePoint: devicePoint, monitorSubjectAreaChange: true)
+    @IBAction func focusAndExposeTap(_ gestureRecognizer: UIGestureRecognizer) {
+        let devicePoint = (self.previewView.layer as! AVCaptureVideoPreviewLayer).captureDevicePointConverted(fromLayerPoint: gestureRecognizer.location(in: gestureRecognizer.view))
+        self.focusWithMode(AVCaptureDevice.FocusMode.autoFocus, exposeWithMode: AVCaptureDevice.ExposureMode.autoExpose, atDevicePoint: devicePoint, monitorSubjectAreaChange: true)
     }
     
-    @IBAction func didTapInstantSwitch(sender: UISwitch) {
-        if !defaults.boolForKey(firstInstantSwitch) {
-            dispatch_async(dispatch_get_main_queue()) {
+    @IBAction func didTapInstantSwitch(_ sender: UISwitch) {
+        if !defaults.bool(forKey: firstInstantSwitch) {
+            DispatchQueue.main.async {
                 let message = NSLocalizedString("Photo gets posted as soon as you tap the shutter", comment: "One time alert explaining Instant Mode")
-                let alertController = UIAlertController(title: "Instant Mode", message: message, preferredStyle: UIAlertControllerStyle.Alert)
-                let cancelAction = UIAlertAction(title: NSLocalizedString("Sweet", comment: "Alert OK button"), style: UIAlertActionStyle.Cancel, handler: nil)
+                let alertController = UIAlertController(title: "Instant Mode", message: message, preferredStyle: UIAlertControllerStyle.alert)
+                let cancelAction = UIAlertAction(title: NSLocalizedString("Sweet", comment: "Alert OK button"), style: UIAlertActionStyle.cancel, handler: nil)
                 alertController.addAction(cancelAction)
-                self.presentViewController(alertController, animated: true, completion: nil)
+                self.present(alertController, animated: true, completion: nil)
             }
-            defaults.setBool(true, forKey: firstInstantSwitch)
+            defaults.set(true, forKey: firstInstantSwitch)
         }
     }
     
@@ -340,29 +342,29 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
 //    }
     
     // MARK: - TextView Delegate
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true)
-        super.touchesBegan(touches, withEvent: event)
+        super.touchesBegan(touches, with: event)
     }
     
-    func textViewDidBeginEditing(textView: UITextView) {
-        postTapLabel.hidden = true
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        postTapLabel.isHidden = true
         if let currentText = textView.text {
-            let remainingCharacters = 140 - currentText.characters.count
+            let remainingCharacters = 140 - currentText.count
             postCountLabel.text = "Characters left: \(remainingCharacters.description)"
         }
     }
     
-    func textViewDidEndEditing(textView: UITextView) {
+    func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text == nil || textView.text == "" {
-            postTapLabel.hidden = false
+            postTapLabel.isHidden = false
         }
         textView.resignFirstResponder()
         let tweet = textView.text
-        NSUserDefaults.standardUserDefaults().setObject(tweet, forKey: UserDefaultsKeys.savedTweet.rawValue)
+        UserDefaults.standard.set(tweet, forKey: UserDefaultsKeys.savedTweet.rawValue)
     }
     
-    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         //enable tab
         if text == "\t" {
             textView.endEditing(true)
@@ -372,7 +374,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
         //also check when deleting
         if range.length==1 && text.isEmpty {
             if let currentText = textView.text {
-                let remainingCharacters = 140 - (currentText.characters.count - 1)
+                let remainingCharacters = 140 - (currentText.count - 1)
                 postCountLabel.text = "Characters left: \(remainingCharacters.description)"
             }
             return true
@@ -383,7 +385,7 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
             return false
         } else {
             if let currentText = textView.text {
-                let remainingCharacters = 140 - (currentText.characters.count + text.characters.count)
+                let remainingCharacters = 140 - (currentText.count + text.count)
                 postCountLabel.text = "Characters left: \(remainingCharacters.description)"
             }
             return true
@@ -396,18 +398,18 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
 //MARK: - Facebook Delegate
 
 extension CameraViewController: FBSDKSharingDelegate {
-    func sharer(sharer: FBSDKSharing!, didCompleteWithResults results: [NSObject : AnyObject]!) {
+    func sharer(_ sharer: FBSDKSharing!, didCompleteWithResults results: [AnyHashable: Any]!) {
         networkIndicator.stopAnimating()
         celebrate()
     }
     
-    func sharer(sharer: FBSDKSharing!, didFailWithError error: NSError!) {
+    func sharer(_ sharer: FBSDKSharing!, didFailWithError error: Error!) {
         networkIndicator.stopAnimating()
         showNetworkError()
         print(error)
     }
     
-    func sharerDidCancel(sharer: FBSDKSharing!) {
+    func sharerDidCancel(_ sharer: FBSDKSharing!) {
         //probably shouldn't ever happen
         networkIndicator.stopAnimating()
     }
@@ -426,10 +428,10 @@ extension CameraViewController: FBSDKSharingDelegate {
         }
         
         self.confettiView.startConfetti()
-        timer = NSTimer.scheduledTimerWithTimeInterval(1.5, target: self, selector: #selector(endCelebrate(_:)), userInfo: nil, repeats: false)
+        timer = Timer.scheduledTimer(timeInterval: 1.5, target: self, selector: #selector(endCelebrate(_:)), userInfo: nil, repeats: false)
     }
     
-    func endCelebrate(sender: NSTimer) {
+    @objc func endCelebrate(_ sender: Timer) {
         self.confettiView.stopConfetti()
         sender.invalidate()
     }
@@ -441,22 +443,22 @@ extension CameraViewController: FBSDKSharingDelegate {
 
     //MARK: - Twitter Methods
 
-    func tweetWithContent(tweetString: String, tweetImage: NSData) {
+    func tweetWithContent(_ tweetString: String, tweetImage: Data) {
         
         let uploadUrl = "https://upload.twitter.com/1.1/media/upload.json"
         let updateUrl = "https://api.twitter.com/1.1/statuses/update.json"
-        let imageString = tweetImage.base64EncodedStringWithOptions(NSDataBase64EncodingOptions())
+        let imageString = tweetImage.base64EncodedString(options: NSData.Base64EncodingOptions())
         
-        let client = TWTRAPIClient.clientWithCurrentUser()
+        let client = TWTRAPIClient.withCurrentUser()
         
-        let request = client.URLRequestWithMethod("POST", URL: uploadUrl, parameters: ["media": imageString], error: nil)
+        let request = client.urlRequest(withMethod: "POST", urlString: uploadUrl, parameters: ["media": imageString], error: nil)
         client.sendTwitterRequest(request, completion: { (urlResponse, data, connectionError) -> Void in
             
-            if let dictionary = JSON(data: data!).dictionaryObject {
+            if let dictionary = try! JSON(data: data!).dictionaryObject {
             
-                let message: [NSObject:AnyObject] = ["status": tweetString, "media_ids": dictionary["media_id_string"]!]
-                let request = client.URLRequestWithMethod("POST",
-                    URL: updateUrl, parameters: message, error:nil)
+                let message: [AnyHashable: Any] = ["status": tweetString, "media_ids": dictionary["media_id_string"]!]
+                let request = client.urlRequest(withMethod: "POST",
+                                                urlString: updateUrl, parameters: message, error:nil)
                 
                 client.sendTwitterRequest(request, completion: { (response, data, connectionError) -> Void in
                     self.networkIndicator.stopAnimating()
@@ -483,15 +485,97 @@ extension CameraViewController: FBSDKSharingDelegate {
 //    }
 }
 
+
+//MARK: AVCapturePhotoCaptureDelegate
+
+extension CameraViewController: AVCapturePhotoCaptureDelegate {
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        cleanUI()
+
+        guard let photoData = photo.fileDataRepresentation() else { return }
+
+        postToSocialMedia(photoData: photoData)
+        savePhotoToDisk(photoData: photoData)
+
+
+    }
+
+    func cleanUI() {
+        DispatchQueue.main.async {
+            self.postTextView.text.removeAll()
+            self.postTextView.text = ""
+            if let currentText = self.postTextView.text {
+                let remainingCharacters = 140 - currentText.count
+                self.postCountLabel.text = "Characters left: \(remainingCharacters.description)"
+                UserDefaults.standard.set(currentText, forKey: UserDefaultsKeys.savedTweet.rawValue)
+            }
+        }
+    }
+
+    func savePhotoToDisk(photoData: Data) {
+//        let requestedPhotoSettings = AVCapturePhotoSettings()
+        PHPhotoLibrary.requestAuthorization { status in
+
+            if status == .authorized {
+
+                PHPhotoLibrary.shared().performChanges({
+
+                    let options = PHAssetResourceCreationOptions()
+                    let creationRequest = PHAssetCreationRequest.forAsset()
+//                    options.uniformTypeIdentifier = requestedPhotoSettings.processedFileType.map { $0.rawValue }
+
+                    creationRequest.addResource(with: .photo, data: photoData, options: options)
+
+
+                }, completionHandler: { _, error in
+                    if let error = error {
+                        print("Error occurred while saving image to photo library: %@", error)
+                    } else {
+                        self.newPhotoReady = true
+                    }
+
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                        self.enableUI(true)
+                    }
+                })
+            }
+        }
+    }
+
+    func postToSocialMedia(photoData: Data) {
+        self.networkIndicator.startAnimating()
+
+        //MARK: - Post Tweet
+        if TWTRTwitter.sharedInstance().sessionStore.session() != nil {
+            self.tweetWithContent(self.postTextView.text, tweetImage: photoData)
+        }
+
+        //MARK: - Post to Facebook
+        if FBSDKAccessToken.current() != nil {
+            let image = UIImage(data: photoData)
+
+            let fbContent = FBSDKSharePhotoContent()
+
+            let fbPhoto = FBSDKSharePhoto(image: image, userGenerated: true)
+            fbPhoto?.caption = self.postTextView.text
+
+            fbContent.photos = [fbPhoto!]
+            FBSDKShareAPI.share(with: fbContent, delegate: self)
+        }
+    }
+}
+
 extension CameraViewController {
     
     //MARK: Initial Setup
     
-    func enableUI(sender: Bool) {
-        shutterButton.enabled = sender
+    func enableUI(_ sender: Bool) {
+        shutterButton.isEnabled = sender
         //        recordButton.enabled = sender
         // Only enable the ability to change camera if the device has more than one camera.
-        switchButton.enabled = sender && (AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo).count > 1)
+        // all ios 10 devices do
+        switchButton.isEnabled = sender
         
     }
     
@@ -510,34 +594,34 @@ extension CameraViewController {
         self.previewView.session = self.session
         
         // Communicate with the session and other session objects on this queue.
-        self.sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL)
+        self.sessionQueue = DispatchQueue(label: "session queue", attributes: [])
         
         
         // Check video authorization status. Video access is required and audio access is optional.
         // If audio access is denied, audio is not recorded during movie recording.
-        switch AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo) {
-        case .Authorized:
+        switch AVCaptureDevice.authorizationStatus(for: AVMediaType.video) {
+        case .authorized:
             // The user has previously granted access to the camera.
-            self.setupResult = AVCamSetupResult.Success
+            self.setupResult = AVCamSetupResult.success
             
             break
-        case .NotDetermined:
+        case .notDetermined:
             // The user has not yet been presented with the option to grant video access.
             // We suspend the session queue to delay session setup until the access request has completed to avoid
             // asking the user for audio access if video access is denied.
             // Note that audio access will be implicitly requested when we create an AVCaptureDeviceInput for audio during session setup.
-            dispatch_suspend(self.sessionQueue)
-            AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo) {granted in
+            self.sessionQueue.suspend()
+            AVCaptureDevice.requestAccess(for: AVMediaType.video) {granted in
                 if granted {
-                    self.setupResult = AVCamSetupResult.Success
+                    self.setupResult = AVCamSetupResult.success
                 } else {
-                    self.setupResult = AVCamSetupResult.CameraNotAuthorized
+                    self.setupResult = AVCamSetupResult.cameraNotAuthorized
                 }
-                dispatch_resume(self.sessionQueue)
+                self.sessionQueue.resume()
             }
         default:
             // The user has previously denied access.
-            self.setupResult = AVCamSetupResult.CameraNotAuthorized
+            self.setupResult = AVCamSetupResult.cameraNotAuthorized
         }
         
     }
@@ -548,17 +632,17 @@ extension CameraViewController {
         // Why not do all of this on the main queue?
         // Because -[AVCaptureSession startRunning] is a blocking call which can take a long time. We dispatch session setup to the sessionQueue
         // so that the main queue isn't blocked, which keeps the UI responsive.
-        dispatch_async(self.sessionQueue) {
-            guard self.setupResult == AVCamSetupResult.Success else {
+        self.sessionQueue.async {
+            guard self.setupResult == AVCamSetupResult.success else {
                 return
             }
             
             self.backgroundRecordingID = UIBackgroundTaskInvalid
             
-            let videoDevice = CameraViewController.deviceWithMediaType(AVMediaTypeVideo, preferringPosition: AVCaptureDevicePosition.Back)
+            let videoDevice = AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType.video, position: .back)
             let videoDeviceInput: AVCaptureDeviceInput!
             do {
-                videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+                videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice!)
                 
             } catch let error as NSError {
                 videoDeviceInput = nil
@@ -573,7 +657,7 @@ extension CameraViewController {
                 self.session.addInput(videoDeviceInput)
                 self.videoDeviceInput = videoDeviceInput
                 
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     // Why are we dispatching this to the main queue?
                     // Because AVCaptureVideoPreviewLayer is the backing layer for AAPLPreviewView and UIView
                     // can only be manipulated on the main thread.
@@ -582,34 +666,34 @@ extension CameraViewController {
                     
                     // Use the status bar orientation as the initial video orientation. Subsequent orientation changes are handled by
                     // -[viewWillTransitionToSize:withTransitionCoordinator:].
-                    let statusBarOrientation = UIApplication.sharedApplication().statusBarOrientation
-                    var initialVideoOrientation = AVCaptureVideoOrientation.Portrait
-                    if statusBarOrientation != UIInterfaceOrientation.Unknown {
+                    let statusBarOrientation = UIApplication.shared.statusBarOrientation
+                    var initialVideoOrientation = AVCaptureVideoOrientation.portrait
+                    if statusBarOrientation != UIInterfaceOrientation.unknown {
                         initialVideoOrientation = AVCaptureVideoOrientation(rawValue: statusBarOrientation.rawValue)!
                     }
                     
                     let previewLayer = self.previewView.layer as! AVCaptureVideoPreviewLayer
-                    previewLayer.connection.videoOrientation = initialVideoOrientation
+                    previewLayer.connection?.videoOrientation = initialVideoOrientation
                     
                     let preview = self.previewView
-                    let blur = UIBlurEffect(style: UIBlurEffectStyle.Dark)
+                    let blur = UIBlurEffect(style: UIBlurEffectStyle.dark)
                     self.blurView = UIVisualEffectView(effect: blur)
-                    self.blurView.frame = CGRectMake(0, 0, preview.frame.width, preview.frame.height)
-                    self.blurView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+                    self.blurView.frame = CGRect(x: 0, y: 0, width: (preview?.frame.width)!, height: (preview?.frame.height)!)
+                    self.blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
                     self.blurView.alpha = 0
-                    preview.insertSubview(self.blurView, aboveSubview: preview)
+                    preview?.insertSubview(self.blurView, aboveSubview: preview!)
                     
                     
                 }
             } else {
                 NSLog("Could not add video device input to the session")
-                self.setupResult = AVCamSetupResult.SessionConfigurationFailed
+                self.setupResult = AVCamSetupResult.sessionConfigurationFailed
             }
             
-            let audioDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeAudio)
+            let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)
             let audioDeviceInput: AVCaptureDeviceInput!
             do {
-                audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
+                audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice!)
                 
             } catch let error as NSError {
                 audioDeviceInput = nil
@@ -627,25 +711,24 @@ extension CameraViewController {
             let movieFileOutput = AVCaptureMovieFileOutput()
             if self.session.canAddOutput(movieFileOutput) {
                 self.session.addOutput(movieFileOutput)
-                let connection = movieFileOutput.connectionWithMediaType(AVMediaTypeVideo)
-                if connection?.supportsVideoStabilization ?? false {
-                    connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.Auto
+                let connection = movieFileOutput.connection(with: AVMediaType.video)
+                if connection?.isVideoStabilizationSupported ?? false {
+                    connection?.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.auto
                 }
                 self.movieFileOutput = movieFileOutput
             } else {
                 NSLog("Could not add movie file output to the session")
-                self.setupResult = AVCamSetupResult.SessionConfigurationFailed
+                self.setupResult = AVCamSetupResult.sessionConfigurationFailed
             }
             
-            let stillImageOutput = AVCaptureStillImageOutput()
-            if self.session.canAddOutput(stillImageOutput) {
-                self.session.sessionPreset = AVCaptureSessionPresetPhoto
-                stillImageOutput.outputSettings = [AVVideoCodecKey : AVVideoCodecJPEG]
-                self.session.addOutput(stillImageOutput)
-                self.stillImageOutput = stillImageOutput
+            let photoOutput = AVCapturePhotoOutput()
+            if self.session.canAddOutput(photoOutput) {
+                self.session.sessionPreset = AVCaptureSession.Preset.photo
+                self.session.addOutput(photoOutput)
+                self.photoOutput = photoOutput
             } else {
                 NSLog("Could not add still image output to the session")
-                self.setupResult = AVCamSetupResult.SessionConfigurationFailed
+                self.setupResult = AVCamSetupResult.sessionConfigurationFailed
             }
             
             self.session.commitConfiguration()
@@ -657,23 +740,23 @@ extension CameraViewController {
     func activateCamera() {
         //Handle iOS authorization and activate camera as appropriate
         guard let queue = sessionQueue else {
-            self.sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL)
+            self.sessionQueue = DispatchQueue(label: "session queue", attributes: [])
             activateCamera()
             return
         }
         
-        dispatch_async(queue) {
+        queue.async {
             switch self.setupResult {
-            case .Success:
+            case .success:
                 // Only setup observers and start the session running if setup succeeded.
                 self.addObservers()
                 self.session.startRunning()
-                self.sessionRunning = self.session.running
+                self.sessionRunning = self.session.isRunning
                 break
-            case .CameraNotAuthorized:
+            case .cameraNotAuthorized:
                 self.showNoAccessMessage()
                 break
-            case .SessionConfigurationFailed:
+            case .sessionConfigurationFailed:
                 self.showCameraFailMessage()
                 break
             }
@@ -686,28 +769,28 @@ extension CameraViewController {
     func authorizePhotos() {
         //Photos status check
         switch PHPhotoLibrary.authorizationStatus() {
-        case .Authorized:
+        case .authorized:
             print("photos authorized")
             break
-        case .Denied:
+        case .denied:
             print("photos denied")
             // if camera is not authorized we already showed no access message
-            if setupResult != .CameraNotAuthorized {
+            if setupResult != .cameraNotAuthorized {
                 showNoAccessMessage()
             }
             break
-        case .Restricted:
+        case .restricted:
             print ("photos restricted")
             // if camera is not authorized we already showed no access message
-            if setupResult != .CameraNotAuthorized {
+            if setupResult != .cameraNotAuthorized {
                 showNoAccessMessage()
             }
             break
-        case .NotDetermined:
+        case .notDetermined:
             print ("photos not determined")
-            dispatch_suspend(self.sessionQueue)
+            self.sessionQueue.suspend()
             PHPhotoLibrary.requestAuthorization({ (status: PHAuthorizationStatus) -> Void in
-                if status == PHAuthorizationStatus.Authorized {
+                if status == PHAuthorizationStatus.authorized {
                     
                     self.photosData.setupPhotos()
                     
@@ -716,33 +799,33 @@ extension CameraViewController {
                     self.authorizePhotos()
                 }
                 
-                dispatch_resume(self.sessionQueue)
+                self.sessionQueue.resume()
             })
         }
     }
     
     func showNoAccessMessage () {
-        dispatch_async(dispatch_get_main_queue()){
+        DispatchQueue.main.async{
             let message = NSLocalizedString("We need permission to your Photos and Camera to snap savory selfies", comment: "Alert message when the user has denied access to the camera or photos" )
-            let alertController = UIAlertController(title: "No Photos or Camera", message: message, preferredStyle: UIAlertControllerStyle.Alert)
-            let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: UIAlertActionStyle.Cancel, handler: nil)
+            let alertController = UIAlertController(title: "No Photos or Camera", message: message, preferredStyle: UIAlertControllerStyle.alert)
+            let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: UIAlertActionStyle.cancel, handler: nil)
             alertController.addAction(cancelAction)
             // Provide quick access to Settings.
-            let settingsAction = UIAlertAction(title: NSLocalizedString("Settings", comment: "Alert button to open Settings"), style: UIAlertActionStyle.Default) {action in
-                UIApplication.sharedApplication().openURL(NSURL(string:UIApplicationOpenSettingsURLString)!)
+            let settingsAction = UIAlertAction(title: NSLocalizedString("Settings", comment: "Alert button to open Settings"), style: UIAlertActionStyle.default) {action in
+                UIApplication.shared.open(URL(string:UIApplicationOpenSettingsURLString)!, options: [:], completionHandler: nil)
             }
             alertController.addAction(settingsAction)
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         }
     }
     
     func showCameraFailMessage() {
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             let message = NSLocalizedString("Unable to capture media", comment: "Alert message when something goes wrong during capture session configuration")
-            let alertController = UIAlertController(title: App.Name.rawValue, message: message, preferredStyle: UIAlertControllerStyle.Alert)
-            let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: UIAlertActionStyle.Cancel, handler: nil)
+            let alertController = UIAlertController(title: App.Name.rawValue, message: message, preferredStyle: UIAlertControllerStyle.alert)
+            let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: UIAlertActionStyle.cancel, handler: nil)
             alertController.addAction(cancelAction)
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         }
     }
     
@@ -751,139 +834,44 @@ extension CameraViewController {
     func captureStillImage() {
         activityIndicator.startAnimating()
         enableUI(false)
-        dispatch_async(self.sessionQueue) {
-            let connection = self.stillImageOutput.connectionWithMediaType(AVMediaTypeVideo)
+        self.sessionQueue.async {
+            let connection = self.photoOutput.connection(with: AVMediaType.video)
             let previewLayer = self.previewView.layer as! AVCaptureVideoPreviewLayer
             
             // Update the orientation on the still image output video connection before capturing.
-            connection.videoOrientation = previewLayer.connection.videoOrientation
+            connection?.videoOrientation = (previewLayer.connection?.videoOrientation)!
             
             // Flash set to Auto for Still Capture.
-            CameraViewController.setFlashMode(AVCaptureFlashMode.Auto, forDevice: self.videoDeviceInput.device)
-            
-            // Capture a still image.
-            self.stillImageOutput.captureStillImageAsynchronouslyFromConnection(connection) { imageDataSampleBuffer, error in
-                if imageDataSampleBuffer != nil {
-                    // The sample buffer is not retained. Create image data before saving the still image to the photo library asynchronously.
-                    let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataSampleBuffer)
-                    
-                    self.networkIndicator.startAnimating()
+            let captureSettings = CameraViewController.getFlashSettings(camera: self.videoDeviceInput.device, flashMode: .auto)
 
-                    //MARK: - Post Tweet
-                    if Twitter.sharedInstance().sessionStore.session() != nil {
-                        self.tweetWithContent(self.postTextView.text, tweetImage: imageData)
-                    }
-                    
-                    //MARK: - Post to Facebook
-                    if FBSDKAccessToken.currentAccessToken() != nil {
-                        let image = UIImage(data: imageData)
-                        
-                        let fbContent = FBSDKSharePhotoContent()
-                        
-                        let fbPhoto = FBSDKSharePhoto(image: image, userGenerated: true)
-                        fbPhoto.caption = self.postTextView.text
-                        
-                        fbContent.photos = [fbPhoto]
-                        FBSDKShareAPI.shareWithContent(fbContent, delegate: self)
-                    }
-
-                    
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.postTextView.text.removeAll()
-                        self.postTextView.text = ""
-                        if let currentText = self.postTextView.text {
-                            let remainingCharacters = 140 - currentText.characters.count
-                            self.postCountLabel.text = "Characters left: \(remainingCharacters.description)"
-                            NSUserDefaults.standardUserDefaults().setObject(currentText, forKey: UserDefaultsKeys.savedTweet.rawValue)
-                        }
-                    }
-                    
-                    //save to disk
-                    PHPhotoLibrary.requestAuthorization {status in
-                        if status == PHAuthorizationStatus.Authorized {
-                            // To preserve the metadata, we create an asset from the JPEG NSData representation.
-                            // Note that creating an asset from a UIImage discards the metadata.
-                            // In iOS 9, we can use -[PHAssetCreationRequest addResourceWithType:data:options].
-                            // In iOS 8, we save the image to a temporary file and use +[PHAssetChangeRequest creationRequestForAssetFromImageAtFileURL:].
-                            if #available(iOS 9.0, *) {
-                                PHPhotoLibrary.sharedPhotoLibrary().performChanges({
-                                    PHAssetCreationRequest.creationRequestForAsset().addResourceWithType(.Photo, data: imageData, options: nil)
-                                    }, completionHandler: {success, error in
-                                        if !success {
-                                            NSLog("Error occurred while saving image to photo library: %@", error!)
-                                        } else {
-                                            self.newPhotoReady = true
-                                        }
-                                        dispatch_async(dispatch_get_main_queue()) {
-                                            self.activityIndicator.stopAnimating()
-                                            self.enableUI(true)
-                                        }
-                                })
-                            } else {
-                                let temporaryFileName = NSProcessInfo().globallyUniqueString as NSString
-                                let temporaryFilePath = (NSTemporaryDirectory() as NSString).stringByAppendingPathComponent(temporaryFileName.stringByAppendingPathExtension("jpg")!)
-                                let temporaryFileURL = NSURL(fileURLWithPath: temporaryFilePath)
-                                
-                                PHPhotoLibrary.sharedPhotoLibrary().performChanges({
-                                    do {
-                                        try imageData.writeToURL(temporaryFileURL, options: .AtomicWrite)
-                                        PHAssetChangeRequest.creationRequestForAssetFromImageAtFileURL(temporaryFileURL)
-                                    } catch let error as NSError {
-                                        NSLog("Error occured while writing image data to a temporary file: %@", error)
-                                    } catch _ {
-                                        fatalError()
-                                    }
-                                    }, completionHandler: {success, error in
-                                        if !success {
-                                            NSLog("Error occurred while saving image to photo library: %@", error!)
-                                        } else {
-                                            self.newPhotoReady = true
-                                        }
-                                        
-                                        dispatch_async(dispatch_get_main_queue()) {
-                                            self.activityIndicator.stopAnimating()
-                                            self.enableUI(true)
-                                        }
-                                        
-                                        // Delete the temporary file.
-                                        do {
-                                            try NSFileManager.defaultManager().removeItemAtURL(temporaryFileURL)
-                                        } catch _ {}
-                                })
-                            }
-                        }
-                    }
-                } else {
-                    NSLog("Could not capture still image: %@", error)
-                }
-            }
+            self.photoOutput.capturePhoto(with: captureSettings, delegate: self)
         }
-        
+
     }
     
     func switchCameras() {
         self.enableUI(false)
         blurPreview(true)
         
-        dispatch_async(self.sessionQueue) {
+        self.sessionQueue.async {
             let currentVideoDevice = self.videoDeviceInput.device
-            var preferredPosition = AVCaptureDevicePosition.Unspecified
+            var preferredPosition = AVCaptureDevice.Position.unspecified
             let currentPosition = currentVideoDevice.position
             
             switch currentPosition {
-            case AVCaptureDevicePosition.Unspecified, AVCaptureDevicePosition.Front:
-                preferredPosition = AVCaptureDevicePosition.Back
+            case .unspecified, .front:
+                preferredPosition = .back
                 self.toggleAnimation.subtype = kCATransitionFromRight
-            case AVCaptureDevicePosition.Back:
-                preferredPosition = AVCaptureDevicePosition.Front
+            case .back:
+                preferredPosition = .front
                 self.toggleAnimation.subtype = kCATransitionFromLeft
             }
             
-            let videoDevice = CameraViewController.deviceWithMediaType(AVMediaTypeVideo,  preferringPosition: preferredPosition)
+            let videoDevice = AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType.video, position: preferredPosition)
             
             let videoDeviceInput: AVCaptureDeviceInput!
             do {
-                videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
+                videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice!)
                 
             } catch let error as NSError {
                 videoDeviceInput = nil
@@ -905,12 +893,12 @@ extension CameraViewController {
             
             if self.session.canAddInput(videoDeviceInput) {
                 //remove notifications for old camera input
-                NSNotificationCenter.defaultCenter().removeObserver(self, name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: currentVideoDevice)
+                NotificationCenter.default.removeObserver(self, name: NSNotification.Name.AVCaptureDeviceSubjectAreaDidChange, object: currentVideoDevice)
                 //start notifications for new camera input
-                NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange),  name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: videoDevice)
+                NotificationCenter.default.addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange),  name: NSNotification.Name.AVCaptureDeviceSubjectAreaDidChange, object: videoDevice)
                 
-                CameraViewController.setFlashMode(AVCaptureFlashMode.Auto, forDevice: videoDevice!)
-                
+//                CameraViewController.setFlashMode(AVCaptureFlashMode.auto, forDevice: videoDevice!)
+
                 self.session.addInput(videoDeviceInput)
                 self.videoDeviceInput = videoDeviceInput
                 
@@ -919,14 +907,14 @@ extension CameraViewController {
                 self.session.addInput(self.videoDeviceInput)
             }
             
-            let connection = self.movieFileOutput.connectionWithMediaType(AVMediaTypeVideo)
-            if connection.supportsVideoStabilization {
-                connection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.Auto
+            let connection = self.movieFileOutput.connection(with: AVMediaType.video)
+            if (connection?.isVideoStabilizationSupported)! {
+                connection?.preferredVideoStabilizationMode = AVCaptureVideoStabilizationMode.auto
             }
             
             self.session.commitConfiguration()
             
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 self.enableUI(true)
                 self.blurPreview(false)
             }
@@ -935,28 +923,28 @@ extension CameraViewController {
     
     func resumeSession() {
         guard let queue = sessionQueue else {
-            self.sessionQueue = dispatch_queue_create("session queue", DISPATCH_QUEUE_SERIAL)
+            self.sessionQueue = DispatchQueue(label: "session queue", attributes: [])
             resumeSession()
             return
         }
-        dispatch_async(queue) {
+        queue.async {
             // The session might fail to start running, e.g., if a phone or FaceTime call is still using audio or video.
             // A failure to start the session running will be communicated via a session runtime error notification.
             // To avoid repeatedly failing to start the session running, we only try to restart the session running in the
             // session runtime error handler if we aren't trying to resume the session running.
             self.session.startRunning()
-            self.sessionRunning = self.session.running
-            if !self.session.running {
-                dispatch_async(dispatch_get_main_queue()) {
+            self.sessionRunning = self.session.isRunning
+            if !self.session.isRunning {
+                DispatchQueue.main.async {
                     let message = NSLocalizedString("Unable to resume", comment: "Alert message when unable to resume the session running")
-                    let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: UIAlertControllerStyle.Alert)
-                    let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: UIAlertActionStyle.Cancel, handler: nil)
+                    let alertController = UIAlertController(title: "AVCam", message: message, preferredStyle: UIAlertControllerStyle.alert)
+                    let cancelAction = UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: UIAlertActionStyle.cancel, handler: nil)
                     alertController.addAction(cancelAction)
-                    self.presentViewController(alertController, animated: true, completion: nil)
+                    self.present(alertController, animated: true, completion: nil)
                 }
             } else {
-                dispatch_async(dispatch_get_main_queue()) {
-                    self.resumeButton.hidden = true
+                DispatchQueue.main.async {
+                    self.resumeButton.isHidden = true
                 }
             }
         }
@@ -966,26 +954,26 @@ extension CameraViewController {
     
     //MARK: Device Configuration
     
-    func focusWithMode(focusMode: AVCaptureFocusMode, exposeWithMode exposureMode: AVCaptureExposureMode, atDevicePoint point:CGPoint, monitorSubjectAreaChange: Bool) {
-        if self.setupResult == AVCamSetupResult.Success {
-            dispatch_async(self.sessionQueue) {
+    func focusWithMode(_ focusMode: AVCaptureDevice.FocusMode, exposeWithMode exposureMode: AVCaptureDevice.ExposureMode, atDevicePoint point:CGPoint, monitorSubjectAreaChange: Bool) {
+        if self.setupResult == AVCamSetupResult.success {
+            self.sessionQueue.async {
                 let device = self.videoDeviceInput.device
                 do {
                     try device.lockForConfiguration()
                     defer {device.unlockForConfiguration()}
                     // Setting (focus/exposure)PointOfInterest alone does not initiate a (focus/exposure) operation.
                     // Call -set(Focus/Exposure)Mode: to apply the new point of interest.
-                    if device.focusPointOfInterestSupported && device.isFocusModeSupported(focusMode) {
+                    if (device.isFocusPointOfInterestSupported) && (device.isFocusModeSupported(focusMode)) {
                         device.focusPointOfInterest = point
                         device.focusMode = focusMode
                     }
                     
-                    if device.exposurePointOfInterestSupported && device.isExposureModeSupported(exposureMode) {
+                    if (device.isExposurePointOfInterestSupported) && (device.isExposureModeSupported(exposureMode)) {
                         device.exposurePointOfInterest = point
                         device.exposureMode = exposureMode
                     }
                     
-                    device.subjectAreaChangeMonitoringEnabled = monitorSubjectAreaChange
+                    device.isSubjectAreaChangeMonitoringEnabled = monitorSubjectAreaChange
                 } catch let error as NSError {
                     NSLog("Could not lock device for configuration: %@", error)
                 } catch _ {}
@@ -993,95 +981,77 @@ extension CameraViewController {
         }
     }
     
-    class func setFlashMode(flashMode: AVCaptureFlashMode, forDevice device: AVCaptureDevice) {
-        if device.hasFlash && device.isFlashModeSupported(flashMode) {
-            do {
-                try device.lockForConfiguration()
-                defer {device.unlockForConfiguration()}
-                device.flashMode = flashMode
-            } catch let error as NSError {
-                NSLog("Could not lock device for configuration: %@", error)
-            }
+    class func getFlashSettings(camera: AVCaptureDevice, flashMode: AVCaptureDevice.FlashMode) -> AVCapturePhotoSettings {
+        let settings = AVCapturePhotoSettings()
+        if camera.hasFlash {
+            settings.flashMode = flashMode
         }
-    }
-    
-    class func deviceWithMediaType(mediaType: String, preferringPosition position: AVCaptureDevicePosition) -> AVCaptureDevice? {
-        let devices = AVCaptureDevice.devicesWithMediaType(mediaType)
-        var captureDevice = devices.first as! AVCaptureDevice?
-        
-        for device in devices as! [AVCaptureDevice] {
-            if device.position == position {
-                captureDevice = device
-                break
-            }
-        }
-        
-        return captureDevice
+        return settings
     }
     
     //MARK: Orientation
     
-    override func shouldAutorotate() -> Bool {
+    override var shouldAutorotate : Bool {
         // Disable autorotation of the interface when recording is in progress.
-        return !(self.movieFileOutput?.recording ?? false)
+        return !(self.movieFileOutput?.isRecording ?? false)
     }
     
-    override func preferredInterfaceOrientationForPresentation() -> UIInterfaceOrientation {
-        return UIInterfaceOrientation.Portrait
+    override var preferredInterfaceOrientationForPresentation : UIInterfaceOrientation {
+        return UIInterfaceOrientation.portrait
     }
     
-    override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        return UIInterfaceOrientationMask.AllButUpsideDown
+    override var supportedInterfaceOrientations : UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.allButUpsideDown
     }
     
-    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
         
-        if setupResult == .Success {
+        if setupResult == .success {
             // Note that the app delegate controls the device orientation notifications required to use the device orientation.
-            let deviceOrientation = UIDevice.currentDevice().orientation
+            let deviceOrientation = UIDevice.current.orientation
             if UIDeviceOrientationIsPortrait(deviceOrientation) || UIDeviceOrientationIsLandscape(deviceOrientation) {
                 let previewLayer = self.previewView.layer as! AVCaptureVideoPreviewLayer
-                previewLayer.connection.videoOrientation = AVCaptureVideoOrientation(rawValue: deviceOrientation.rawValue)!
+                previewLayer.connection?.videoOrientation = AVCaptureVideoOrientation(rawValue: deviceOrientation.rawValue)!
             }
         }
     }
     
     //MARK: KVO and Notifications
     
-    private func addObservers() {
-        self.session.addObserver(self, forKeyPath: "running", options: NSKeyValueObservingOptions.New, context: SessionRunningContext)
-        self.stillImageOutput.addObserver(self, forKeyPath: "capturingStillImage", options:NSKeyValueObservingOptions.New, context: CapturingStillImageContext)
+    fileprivate func addObservers() {
+        self.session.addObserver(self, forKeyPath: "running", options: NSKeyValueObservingOptions.new, context: SessionRunningContext)
+        self.photoOutput.addObserver(self, forKeyPath: "capturingStillImage", options:NSKeyValueObservingOptions.new, context: CapturingStillImageContext)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange), name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput.device)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.sessionRuntimeError(_:)), name: AVCaptureSessionRuntimeErrorNotification, object: self.session)
+        NotificationCenter.default.addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange), name: NSNotification.Name.AVCaptureDeviceSubjectAreaDidChange, object: self.videoDeviceInput.device)
+        NotificationCenter.default.addObserver(self, selector: #selector(CameraViewController.sessionRuntimeError(_:)), name: NSNotification.Name.AVCaptureSessionRuntimeError, object: self.session)
         // A session can only run when the app is full screen. It will be interrupted in a multi-app layout, introduced in iOS 9,
         // see also the documentation of AVCaptureSessionInterruptionReason. Add observers to handle these session interruptions
         // and show a preview is paused message. See the documentation of AVCaptureSessionWasInterruptedNotification for other
         // interruption reasons.
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.sessionWasInterrupted(_:)), name: AVCaptureSessionWasInterruptedNotification, object: self.session)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.sessionInterruptionEnded(_:)), name: AVCaptureSessionInterruptionEndedNotification, object: self.session)
+        NotificationCenter.default.addObserver(self, selector: #selector(CameraViewController.sessionWasInterrupted(_:)), name: NSNotification.Name.AVCaptureSessionWasInterrupted, object: self.session)
+        NotificationCenter.default.addObserver(self, selector: #selector(CameraViewController.sessionInterruptionEnded(_:)), name: NSNotification.Name.AVCaptureSessionInterruptionEnded, object: self.session)
     }
     
-    private func removeCamObservers() {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+    fileprivate func removeCamObservers() {
+        NotificationCenter.default.removeObserver(self)
         
         self.session.removeObserver(self, forKeyPath: "running", context: SessionRunningContext)
-        self.stillImageOutput.removeObserver(self, forKeyPath: "capturingStillImage", context: CapturingStillImageContext)
+        self.photoOutput.removeObserver(self, forKeyPath: "capturingStillImage", context: CapturingStillImageContext)
     }
     
-    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         switch context {
-        case CapturingStillImageContext:
+        case CapturingStillImageContext?:
             
-            let isCapturingStillImage = change![NSKeyValueChangeNewKey]! as! Bool
+            let isCapturingStillImage = change![NSKeyValueChangeKey.newKey]! as! Bool
             
             if isCapturingStillImage {
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     self.previewView.layer.opacity = 0.0
-                    UIView.animateWithDuration(0.25) {
+                    UIView.animate(withDuration: 0.25, animations: {
                         self.previewView.layer.opacity = 1.0
-                    }
+                    }) 
                 }
             }
             
@@ -1089,45 +1059,45 @@ extension CameraViewController {
 //                self.enableUI(!isCapturingStillImage)
 //            }
             
-        case SessionRunningContext:
-            let isSessionRunning = change![NSKeyValueChangeNewKey]! as! Bool
+        case SessionRunningContext?:
+            let isSessionRunning = change![NSKeyValueChangeKey.newKey]! as! Bool
             
-            dispatch_async(dispatch_get_main_queue()) {
-                self.enableUI(isSessionRunning && PHPhotoLibrary.authorizationStatus() == .Authorized)
+            DispatchQueue.main.async {
+                self.enableUI(isSessionRunning && PHPhotoLibrary.authorizationStatus() == .authorized)
             }
         default:
-            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
     
-    func subjectAreaDidChange() {
-        let devicePoint = CGPointMake(0.5, 0.5)
-        self.focusWithMode(AVCaptureFocusMode.ContinuousAutoFocus, exposeWithMode: AVCaptureExposureMode.ContinuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: false)
+    @objc func subjectAreaDidChange() {
+        let devicePoint = CGPoint(x: 0.5, y: 0.5)
+        self.focusWithMode(AVCaptureDevice.FocusMode.continuousAutoFocus, exposeWithMode: AVCaptureDevice.ExposureMode.continuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: false)
     }
     
-    func sessionRuntimeError(notification: NSNotification) {
+    @objc func sessionRuntimeError(_ notification: Notification) {
         let error = notification.userInfo![AVCaptureSessionErrorKey]! as! NSError
         NSLog("Capture session runtime error: %@", error)
         
         // Automatically try to restart the session running if media services were reset and the last start running succeeded.
         // Otherwise, enable the user to try to resume the session running.
-        if error.code == AVError.MediaServicesWereReset.rawValue {
-            dispatch_async(self.sessionQueue) {
+        if error.code == AVError.Code.mediaServicesWereReset.rawValue {
+            self.sessionQueue.async {
                 if self.sessionRunning {
                     self.session.startRunning()
-                    self.sessionRunning = self.session.running
+                    self.sessionRunning = self.session.isRunning
                 } else {
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.resumeButton.hidden = false
+                    DispatchQueue.main.async {
+                        self.resumeButton.isHidden = false
                     }
                 }
             }
         } else {
-            self.resumeButton.hidden = false
+            self.resumeButton.isHidden = false
         }
     }
     
-    func sessionWasInterrupted(notification: NSNotification) {
+    @objc func sessionWasInterrupted(_ notification: Notification) {
         // In some scenarios we want to enable the user to resume the session running.
         // For example, if music playback is initiated via control center while using AVCam,
         // then the user can let AVCam resume the session running, which will stop music playback.
@@ -1140,47 +1110,47 @@ extension CameraViewController {
             let reason = notification.userInfo![AVCaptureSessionInterruptionReasonKey]! as! Int
             NSLog("Capture session was interrupted with reason %ld", reason)
             
-            if reason == AVCaptureSessionInterruptionReason.AudioDeviceInUseByAnotherClient.rawValue ||
-                reason == AVCaptureSessionInterruptionReason.VideoDeviceInUseByAnotherClient.rawValue {
+            if reason == AVCaptureSession.InterruptionReason.audioDeviceInUseByAnotherClient.rawValue ||
+                reason == AVCaptureSession.InterruptionReason.videoDeviceInUseByAnotherClient.rawValue {
                     showResumeButton = true
-            } else if reason == AVCaptureSessionInterruptionReason.VideoDeviceNotAvailableWithMultipleForegroundApps.rawValue {
+            } else if reason == AVCaptureSession.InterruptionReason.videoDeviceNotAvailableWithMultipleForegroundApps.rawValue {
                 // Simply fade-in a label to inform the user that the camera is unavailable.
-                self.cameraUnavailableLabel.hidden = false
+                self.cameraUnavailableLabel.isHidden = false
                 self.cameraUnavailableLabel.alpha = 0.0
-                UIView.animateWithDuration(0.25) {
+                UIView.animate(withDuration: 0.25, animations: {
                     self.cameraUnavailableLabel.alpha = 1.0
-                }
+                }) 
             }
         } else {
             NSLog("Capture session was interrupted")
-            showResumeButton = (UIApplication.sharedApplication().applicationState == UIApplicationState.Inactive)
+            showResumeButton = (UIApplication.shared.applicationState == UIApplicationState.inactive)
         }
         
         if showResumeButton {
             // Simply fade-in a button to enable the user to try to resume the session running.
-            self.resumeButton.hidden = false
+            self.resumeButton.isHidden = false
             self.resumeButton.alpha = 0.0
-            UIView.animateWithDuration(0.25) {
+            UIView.animate(withDuration: 0.25, animations: {
                 self.resumeButton.alpha = 1.0
-            }
+            }) 
         }
     }
     
-    func sessionInterruptionEnded(notification: NSNotification) {
+    @objc func sessionInterruptionEnded(_ notification: Notification) {
         NSLog("Capture session interruption ended")
         
-        if !self.resumeButton.hidden {
-            UIView.animateWithDuration(0.25, animations: {
+        if !self.resumeButton.isHidden {
+            UIView.animate(withDuration: 0.25, animations: {
                 self.resumeButton.alpha = 0.0
                 }, completion: {finished in
-                    self.resumeButton.hidden = true
+                    self.resumeButton.isHidden = true
             })
         }
-        if !self.cameraUnavailableLabel.hidden {
-            UIView.animateWithDuration(0.25, animations: {
+        if !self.cameraUnavailableLabel.isHidden {
+            UIView.animate(withDuration: 0.25, animations: {
                 self.cameraUnavailableLabel.alpha = 0.0
                 }, completion: {finished in
-                    self.cameraUnavailableLabel.hidden = true
+                    self.cameraUnavailableLabel.isHidden = true
             })
         }
     }

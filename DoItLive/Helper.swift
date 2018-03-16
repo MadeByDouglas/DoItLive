@@ -12,13 +12,13 @@ class Helper: NSObject {
     enum PhotoSize: Int {
         //        case Chat
         //        case Profile
-        case Rendevu
+        case rendevu
         //        case RendevuCover
         var value: CGFloat {
             switch self {
                 //            case .Chat: return 400
                 //            case .Profile: return 200
-            case .Rendevu: return 800
+            case .rendevu: return 800
                 //            case .RendevuCover: return 600
             }
         }
@@ -43,38 +43,38 @@ class Helper: NSObject {
         case InvalidDetails = "Check your @'s and dot your .coms"
     }
     
-    static func textIsValid(textField: UITextField, sender: Bool) {
+    static func textIsValid(_ textField: UITextField, sender: Bool) {
         textField.layer.borderWidth = 3.0
         
         if sender == true {
-            textField.layer.borderColor = UIColor.redColor().CGColor
+            textField.layer.borderColor = UIColor.red.cgColor
         } else {
-            textField.layer.borderColor = UIColor.greenColor().CGColor
+            textField.layer.borderColor = UIColor.green.cgColor
         }
     }
     
-    static func invalidCharacterMessage(character: String) -> String {
+    static func invalidCharacterMessage(_ character: String) -> String {
         return "Can't use '\(character)'"
     }
     
-    static func isValidTweetWithErrors(existingText: String?, possibleNewCharacter: String) -> String? {
+    static func isValidTweetWithErrors(_ existingText: String?, possibleNewCharacter: String) -> String? {
         if let text = existingText {
             
-            if (text.characters.count + possibleNewCharacter.characters.count) > 140 {
+            if (text.count + possibleNewCharacter.count) > 140 {
                 return "Tweet is too long"
             }
         }
         return nil
     }
     
-    static func cellsFitAcrossScreen(numberOfCells: Int, labelHeight: CGFloat, itemSpacing: CGFloat, sectionInsetLeft: CGFloat, sectionInsetRight: CGFloat) -> CGSize {
+    static func cellsFitAcrossScreen(_ numberOfCells: Int, labelHeight: CGFloat, itemSpacing: CGFloat, sectionInsetLeft: CGFloat, sectionInsetRight: CGFloat) -> CGSize {
         //using hardwired info get proper spacing for cells across entire screen
         let insideMargin = itemSpacing
         let outsideMargins = sectionInsetLeft + sectionInsetRight
         let numberOfDivisions: Int = numberOfCells - 1
         let subtractionForMargins: CGFloat = insideMargin * CGFloat(numberOfDivisions) + outsideMargins
         
-        let fittedWidth = (UIScreen.mainScreen().bounds.width - subtractionForMargins) / CGFloat(numberOfCells)
+        let fittedWidth = (UIScreen.main.bounds.width - subtractionForMargins) / CGFloat(numberOfCells)
         return CGSize(width: fittedWidth, height: fittedWidth + labelHeight)
     }
 }

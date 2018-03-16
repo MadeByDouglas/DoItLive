@@ -21,13 +21,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var twitterUserName: String?
     var facebookUserName: String?
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
+        Fabric.with([TWTRTwitter(), Crashlytics(), Answers()])
         
-        Fabric.with([Twitter.self, Crashlytics.self, Answers.self])
-        
-        NSNotificationCenter.defaultCenter().addObserverForName(Notify.Login.rawValue, object: nil, queue: nil) { (notification) -> Void in
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: Notify.Login.rawValue), object: nil, queue: nil) { (notification) -> Void in
             if let twitterSession = notification.userInfo?["TWTRSession"] as? TWTRSession {
                 self.appLogin(twitterSession, facebookResult: nil)
             } else if let facebookResult = notification.userInfo?["FBSDKLoginResult"] as? FBSDKLoginManagerLoginResult {
@@ -38,7 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         }
         
-        NSNotificationCenter.defaultCenter().addObserverForName(Notify.Logout.rawValue, object: nil, queue: nil) { (notification) -> Void in
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: Notify.Logout.rawValue), object: nil, queue: nil) { (notification) -> Void in
             self.appLogout()
         }
         
@@ -47,37 +46,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
-    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
-        return FBSDKApplicationDelegate.sharedInstance().application(application, openURL: url, sourceApplication: sourceApplication, annotation: annotation)
+    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
+        return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
     }
     
-    func appLogin(twitterSession: TWTRSession?, facebookResult: FBSDKLoginManagerLoginResult?) {
+    func appLogin(_ twitterSession: TWTRSession?, facebookResult: FBSDKLoginManagerLoginResult?) {
         //login handled by twitter and fb buttons
 
         //Answers and Crashlytics Track login
         if let session = twitterSession {
-            Answers.logLoginWithMethod("Twitter", success: true, customAttributes: ["UserID":session.userID, "UserName":session.userName])
+            Answers.logLogin(withMethod: "Twitter", success: true, customAttributes: ["UserID":session.userID, "UserName":session.userName])
             logUser(session.userID, userName: session.userName, userEmail: nil)
             twitterUserName = session.userName
-            NSUserDefaults.standardUserDefaults().setObject(session.userName, forKey: "twitterUserName")
+            UserDefaults.standard.set(session.userName, forKey: "twitterUserName")
             
             handleAuth()
         }
         
         if let loginResult = facebookResult {
-            Answers.logLoginWithMethod("Facebook", success: true, customAttributes: ["UserID":loginResult.token.userID])
+            Answers.logLogin(withMethod: "Facebook", success: true, customAttributes: ["UserID":loginResult.token.userID])
             logUser(loginResult.token.userID, userName: nil, userEmail: nil)
             
             let parameters = ["fields":"id, first_name, email"]
-            FBSDKGraphRequest.init(graphPath: "me", parameters: parameters).startWithCompletionHandler({ (connection, result, error) in
+            FBSDKGraphRequest.init(graphPath: "me", parameters: parameters).start(completionHandler: { (connection, result, error) in
                 
                 if let error = error {
                     print(error)
                     
                 } else if let result = result {
-                    if let firstName = result.valueForKey("first_name") as? String {
+                    if let firstName = (result as AnyObject).value(forKey: "first_name") as? String {
                         self.facebookUserName = firstName
-                        NSUserDefaults.standardUserDefaults().setObject(firstName, forKey: "facebookUserName")
+                        UserDefaults.standard.set(firstName, forKey: "facebookUserName")
                     }
                 }
                 
@@ -87,14 +86,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func appLogout() {
-        if let userID = Twitter.sharedInstance().sessionStore.session()?.userID {
-            Twitter.sharedInstance().sessionStore.logOutUserID(userID)
-            NSUserDefaults.standardUserDefaults().removeObjectForKey("twitterUserName")
+        if let userID = TWTRTwitter.sharedInstance().sessionStore.session()?.userID {
+            TWTRTwitter.sharedInstance().sessionStore.logOutUserID(userID)
+            UserDefaults.standard.removeObject(forKey: "twitterUserName")
         }
         
-        if FBSDKAccessToken.currentAccessToken() != nil {
+        if FBSDKAccessToken.current() != nil {
             FBSDKLoginManager().logOut()
-            NSUserDefaults.standardUserDefaults().removeObjectForKey("facebookUserName")
+            UserDefaults.standard.removeObject(forKey: "facebookUserName")
         }
         
         logUser(nil, userName: nil, userEmail: nil)
@@ -104,51 +103,51 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func handleAuth() {
         
-        if Twitter.sharedInstance().sessionStore.session() == nil && FBSDKAccessToken.currentAccessToken() == nil {
+        if TWTRTwitter.sharedInstance().sessionStore.session() == nil && FBSDKAccessToken.current() == nil {
             //login root
-            window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.Login.rawValue)
+            window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewController(withIdentifier: ViewControllerID.Login.rawValue)
         } else {
             //main root
-            if let userName = NSUserDefaults.standardUserDefaults().objectForKey("twitterUserName") as? String {
+            if let userName = UserDefaults.standard.object(forKey: "twitterUserName") as? String {
                 twitterUserName = userName
             }
             
-            if let firstName = NSUserDefaults.standardUserDefaults().objectForKey("facebookUserName") as? String {
+            if let firstName = UserDefaults.standard.object(forKey: "facebookUserName") as? String {
                 facebookUserName = firstName
             }
             
-            window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewControllerWithIdentifier(ViewControllerID.NavFeed.rawValue)
+            window?.rootViewController = UIStoryboard(name: StoryboardID.Main.rawValue, bundle: nil).instantiateViewController(withIdentifier: ViewControllerID.NavFeed.rawValue)
 
         }
     }
     
-    func logUser(userID: String?, userName: String?, userEmail: String?) {
+    func logUser(_ userID: String?, userName: String?, userEmail: String?) {
         Crashlytics.sharedInstance().setUserIdentifier(userID)
         Crashlytics.sharedInstance().setUserName(userName)
         Crashlytics.sharedInstance().setUserEmail(userEmail)
     }
     
-    func applicationWillResignActive(application: UIApplication) {
+    func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
     }
 
-    func applicationDidEnterBackground(application: UIApplication) {
+    func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     }
 
-    func applicationWillEnterForeground(application: UIApplication) {
+    func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
     }
 
-    func applicationDidBecomeActive(application: UIApplication) {
+    func applicationDidBecomeActive(_ application: UIApplication) {
         FBSDKAppEvents.activateApp()
         
-        NSUserDefaults.standardUserDefaults().setBool(true, forKey: UserDefaultsKeys.firstView.rawValue)
+        UserDefaults.standard.set(true, forKey: UserDefaultsKeys.firstView.rawValue)
     }
 
-    func applicationWillTerminate(application: UIApplication) {
+    func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
         
         //clear userDefaults, aparently not called not needed

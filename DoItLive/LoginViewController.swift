@@ -34,10 +34,10 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
             if let unwrappedSession = session {
                 
                 //set bool true so if user logs out and logs back in during same session it pushes camera immediately
-                NSUserDefaults.standardUserDefaults().setBool(true, forKey: UserDefaultsKeys.firstView.rawValue)
+                UserDefaults.standard.set(true, forKey: UserDefaultsKeys.firstView.rawValue)
                 
                 //log in notification
-                NSNotificationCenter.defaultCenter().postNotificationName(Notify.Login.rawValue, object: nil, userInfo: ["TWTRSession":unwrappedSession])
+                NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Login.rawValue), object: nil, userInfo: ["TWTRSession":unwrappedSession])
             } else {
                 NSLog("In \(self.classForCoder.description()) Login error: %@", error!.localizedDescription);
             }
@@ -53,16 +53,16 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
         self.view.addSubview(logInButtonFacebook)
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         spinningView.rotate360Degrees()
 
-        logInButton.enabled = acceptSwitch.on
-        logInButtonFacebook.enabled = acceptSwitch.on
-        spinningView.hidden = !acceptSwitch.on
-        logoImageView.hidden = !acceptSwitch.on
+        logInButton.isEnabled = acceptSwitch.isOn
+        logInButtonFacebook.isEnabled = acceptSwitch.isOn
+        spinningView.isHidden = !acceptSwitch.isOn
+        logoImageView.isHidden = !acceptSwitch.isOn
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         spinningView.stopRotating()
     }
@@ -72,37 +72,37 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
         // Dispose of any resources that can be recreated.
     }
     
-    override internal func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        return UIInterfaceOrientationMask.Portrait
+    override internal var supportedInterfaceOrientations : UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.portrait
     }
     
     //MARK: - QuickLook
-    func numberOfPreviewItemsInPreviewController(controller: QLPreviewController) -> Int{
+    func numberOfPreviewItems(in controller: QLPreviewController) -> Int{
         return 1
     }
     
-    func previewController(controller: QLPreviewController, previewItemAtIndex index: Int) -> QLPreviewItem {
-        let termsPath = NSBundle.mainBundle().pathForResource("App EULA", ofType: "pdf")
-        let termsFile = NSURL(fileURLWithPath: termsPath!)
-        return termsFile
+    func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+        let termsPath = Bundle.main.path(forResource: "App EULA", ofType: "pdf")
+        let termsFile = URL(fileURLWithPath: termsPath!)
+        return termsFile as QLPreviewItem
     }
     
     //MARK:  - IBActions
-    @IBAction func didTapSwitch(sender: UISwitch) {
-        logInButton.enabled = acceptSwitch.on
-        logInButtonFacebook.enabled = acceptSwitch.on
-        spinningView.hidden = !acceptSwitch.on
-        logoImageView.hidden = !acceptSwitch.on
+    @IBAction func didTapSwitch(_ sender: UISwitch) {
+        logInButton.isEnabled = acceptSwitch.isOn
+        logInButtonFacebook.isEnabled = acceptSwitch.isOn
+        spinningView.isHidden = !acceptSwitch.isOn
+        logoImageView.isHidden = !acceptSwitch.isOn
     }
     
-    @IBAction func didTapTerms(sender: UIButton) {
+    @IBAction func didTapTerms(_ sender: UIButton) {
         let quickLook = QLPreviewController()
         quickLook.dataSource = self
         spinningView.stopRotating()
-        presentViewController(quickLook, animated: true, completion: nil)
+        present(quickLook, animated: true, completion: nil)
     }
     
-    func loginButton(loginButton: FBSDKLoginButton!, didCompleteWithResult result: FBSDKLoginManagerLoginResult!, error: NSError!) {
+    func loginButton(_ loginButton: FBSDKLoginButton!, didCompleteWith result: FBSDKLoginManagerLoginResult!, error: Error!) {
         if let error = error {
             print(error)
         } else if result.isCancelled {
@@ -110,15 +110,15 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
         } else {
             //set bool true so if user logs out and logs back in during same session it pushes camera immediately
             //TODO: test moving the setting of the key inside login/logout notification for more consise code
-            NSUserDefaults.standardUserDefaults().setBool(true, forKey: UserDefaultsKeys.firstView.rawValue)
+            UserDefaults.standard.set(true, forKey: UserDefaultsKeys.firstView.rawValue)
 
-            NSNotificationCenter.defaultCenter().postNotificationName(Notify.Login.rawValue, object: nil, userInfo: ["FBSDKLoginResult":result])
+            NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Login.rawValue), object: nil, userInfo: ["FBSDKLoginResult":result])
         }
     }
     
-    func loginButtonDidLogOut(loginButton: FBSDKLoginButton!) {
-        NSUserDefaults.standardUserDefaults().setBool(false, forKey: UserDefaultsKeys.firstView.rawValue)
-        NSNotificationCenter.defaultCenter().postNotificationName(Notify.Logout.rawValue, object: nil)
+    func loginButtonDidLogOut(_ loginButton: FBSDKLoginButton!) {
+        UserDefaults.standard.set(false, forKey: UserDefaultsKeys.firstView.rawValue)
+        NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Logout.rawValue), object: nil)
 
     }
 
