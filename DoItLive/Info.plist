@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Used to save photos you take</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Used to browse existing photos to post online</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Used to record sound for videos</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Used to take photos and post online</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -24,6 +32,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>fb1767266856822696</string>
+				<string>twitterkit-uaghEjF7QkEgpj9A2Qsrjv1Zr</string>
 			</array>
 		</dict>
 	</array>
@@ -37,14 +46,15 @@
 		<array>
 			<dict>
 				<key>KitInfo</key>
-				<dict>
-					<key>consumerKey</key>
-					<string>uaghEjF7QkEgpj9A2Qsrjv1Zr</string>
-					<key>consumerSecret</key>
-					<string>sUVqTHSlNJHzQkgPc0do5FjCl2E72N5Pe7LvYSZeIgJkULPzCn</string>
-				</dict>
+				<dict/>
 				<key>KitName</key>
-				<string>Twitter</string>
+				<string>Crashlytics</string>
+			</dict>
+			<dict>
+				<key>KitInfo</key>
+				<dict/>
+				<key>KitName</key>
+				<string>Answers</string>
 			</dict>
 		</array>
 	</dict>
@@ -55,6 +65,7 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>twitter</string>
+		<string>twitterauth</string>
 		<string>fb</string>
 		<string>fbapi</string>
 		<string>fb-messenger-api</string>

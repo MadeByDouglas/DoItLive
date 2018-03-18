@@ -6,7 +6,8 @@
   "data" : [
     {
       "idiom" : "universal",
-      "filename" : "1_person_cheering-Jett_Rifkin-1851518140.mp3"
+      "filename" : "1_person_cheering-Jett_Rifkin-1851518140.mp3",
+      "universal-type-identifier" : "mp3"
     }
   ]
 }

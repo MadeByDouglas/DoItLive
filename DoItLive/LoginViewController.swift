@@ -32,25 +32,34 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
 
         logInButton = TWTRLogInButton { (session, error) in
             if let unwrappedSession = session {
-                
-                //set bool true so if user logs out and logs back in during same session it pushes camera immediately
-                UserDefaults.standard.set(true, forKey: UserDefaultsKeys.firstView.rawValue)
-                
+
                 //log in notification
-                NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Login.rawValue), object: nil, userInfo: ["TWTRSession":unwrappedSession])
+                let sessionDict: [String: TWTRSession] = ["TWTRSession": unwrappedSession]
+                NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Login.rawValue), object: nil, userInfo: sessionDict)
+                
             } else {
                 NSLog("In \(self.classForCoder.description()) Login error: %@", error!.localizedDescription);
             }
         }
         
-        logInButton.center = self.view.center
-        logInButton.center.y = self.view.center.y + 80
         self.view.addSubview(logInButton)
-        
-        logInButtonFacebook.frame = logInButton.frame
+        logInButton.translatesAutoresizingMaskIntoConstraints = false
+
+        logInButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        logInButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        logInButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: 80).isActive = true
+
         logInButtonFacebook.titleLabel?.font = logInButton.titleLabel?.font
-        logInButtonFacebook.center.y = logInButton.center.y + 60
         self.view.addSubview(logInButtonFacebook)
+
+        logInButtonFacebook.translatesAutoresizingMaskIntoConstraints = false
+        for constraint in logInButtonFacebook.constraints {
+            logInButtonFacebook.removeConstraint(constraint)
+        }
+        logInButtonFacebook.centerXAnchor.constraint(equalTo: logInButton.centerXAnchor).isActive = true
+        logInButtonFacebook.centerYAnchor.constraint(equalTo: logInButton.centerYAnchor, constant: 60).isActive = true
+        logInButtonFacebook.heightAnchor.constraint(equalTo: logInButton.heightAnchor).isActive = true
+        logInButtonFacebook.widthAnchor.constraint(equalTo: logInButton.widthAnchor).isActive = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -82,9 +91,9 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
     }
     
     func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
-        let termsPath = Bundle.main.path(forResource: "App EULA", ofType: "pdf")
-        let termsFile = URL(fileURLWithPath: termsPath!)
-        return termsFile as QLPreviewItem
+        let termsPath = Bundle.main.path(forResource: "AppEULA", ofType: "pdf")
+        let termsFile = URL(fileURLWithPath: termsPath!) as QLPreviewItem
+        return termsFile
     }
     
     //MARK:  - IBActions
@@ -101,18 +110,14 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
         spinningView.stopRotating()
         present(quickLook, animated: true, completion: nil)
     }
-    
+
     func loginButton(_ loginButton: FBSDKLoginButton!, didCompleteWith result: FBSDKLoginManagerLoginResult!, error: Error!) {
         if let error = error {
             print(error)
         } else if result.isCancelled {
             print("facebook login cancelled")
         } else {
-            //set bool true so if user logs out and logs back in during same session it pushes camera immediately
-            //TODO: test moving the setting of the key inside login/logout notification for more consise code
-            UserDefaults.standard.set(true, forKey: UserDefaultsKeys.firstView.rawValue)
-
-            NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Login.rawValue), object: nil, userInfo: ["FBSDKLoginResult":result])
+            NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Login.rawValue), object: nil, userInfo: ["FBSDKLoginResult": result])
         }
     }
     

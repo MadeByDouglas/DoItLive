@@ -22,7 +22,8 @@
 		C36515391C89042B0031D525 /* GlobalEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = C36515381C89042B0031D525 /* GlobalEnums.swift */; };
 		C365153C1C8969370031D525 /* userDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C365153B1C8969370031D525 /* userDataSource.swift */; };
 		C3AA62BD1D50812000A1A602 /* RayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3AA62BC1D50812000A1A602 /* RayView.swift */; };
-		C3CF09DF1CAA1955000AFDA0 /* App EULA.pdf in Resources */ = {isa = PBXBuildFile; fileRef = C3CF09DE1CAA1955000AFDA0 /* App EULA.pdf */; };
+		C3CF09DF1CAA1955000AFDA0 /* AppEULA.pdf in Resources */ = {isa = PBXBuildFile; fileRef = C3CF09DE1CAA1955000AFDA0 /* AppEULA.pdf */; };
+		C3DA8711205F217D006FF4E9 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3DA8710205F217D006FF4E9 /* SafariServices.framework */; };
 		C3F6F8D71C880C30007376C6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3F6F8D61C880C30007376C6 /* AppDelegate.swift */; };
 		C3F6F8E01C880C30007376C6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3F6F8DE1C880C30007376C6 /* Main.storyboard */; };
 		C3F6F8E21C880C30007376C6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3F6F8E11C880C30007376C6 /* Assets.xcassets */; };
@@ -61,7 +62,8 @@
 		C36515381C89042B0031D525 /* GlobalEnums.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalEnums.swift; sourceTree = "<group>"; };
 		C365153B1C8969370031D525 /* userDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = userDataSource.swift; sourceTree = "<group>"; };
 		C3AA62BC1D50812000A1A602 /* RayView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RayView.swift; sourceTree = "<group>"; };
-		C3CF09DE1CAA1955000AFDA0 /* App EULA.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "App EULA.pdf"; sourceTree = "<group>"; };
+		C3CF09DE1CAA1955000AFDA0 /* AppEULA.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = AppEULA.pdf; sourceTree = "<group>"; };
+		C3DA8710205F217D006FF4E9 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
 		C3F6F8D31C880C30007376C6 /* DoItLive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoItLive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3F6F8D61C880C30007376C6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C3F6F8DF1C880C30007376C6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -76,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3DA8711205F217D006FF4E9 /* SafariServices.framework in Frameworks */,
 				FCE0E645B7A8B3C9E4DFE55D /* Pods_DoItLive.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,6 +89,7 @@
 		BE3980A800BB1D49E1C4861C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C3DA8710205F217D006FF4E9 /* SafariServices.framework */,
 				DCDCE3BCE925FCF25A1D3F3F /* Pods_DoItLive.framework */,
 			);
 			name = Frameworks;
@@ -106,7 +110,7 @@
 		C36515331C8823D60031D525 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				C3CF09DE1CAA1955000AFDA0 /* App EULA.pdf */,
+				C3CF09DE1CAA1955000AFDA0 /* AppEULA.pdf */,
 				C36515381C89042B0031D525 /* GlobalEnums.swift */,
 				C365152A1C881DA70031D525 /* Extensions.swift */,
 				C3AA62BC1D50812000A1A602 /* RayView.swift */,
@@ -240,7 +244,7 @@
 			files = (
 				C3F6F8E51C880C30007376C6 /* LaunchScreen.storyboard in Resources */,
 				C3F6F8E21C880C30007376C6 /* Assets.xcassets in Resources */,
-				C3CF09DF1CAA1955000AFDA0 /* App EULA.pdf in Resources */,
+				C3CF09DF1CAA1955000AFDA0 /* AppEULA.pdf in Resources */,
 				C3F6F8E01C880C30007376C6 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -532,10 +536,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7E5872E148576646BAFE0EA2 /* Pods-DoItLive.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 68KS6FN57P;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -555,9 +559,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8C323C75C6D831978F28B019 /* Pods-DoItLive.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 68KS6FN57P;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",

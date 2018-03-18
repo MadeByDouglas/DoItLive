@@ -98,16 +98,19 @@ class CameraViewController: UIViewController, /*AVCaptureFileOutputRecordingDele
     var player: AVAudioPlayer?
     
     func playSoundFile(_ name: String) {
-        let url = Bundle.main.url(forResource: name, withExtension: "mp3")!
-        
-        do {
-            player = try AVAudioPlayer(contentsOf: url)
-            guard let player = player else { return }
-            
-            player.prepareToPlay()
-            player.play()
-        } catch let error as NSError {
-            print(error.description)
+//        let path = Bundle.main.path(forResource: name, ofType: "mp3")
+//        let url = URL(fileURLWithPath: path!)
+        if let asset = NSDataAsset(name: name) {
+
+            do {
+                player = try AVAudioPlayer(data: asset.data, fileTypeHint: "mp3")
+
+                player?.prepareToPlay()
+                player?.play()
+            } catch let error as NSError {
+                print(error.description)
+            }
+
         }
     }
     

@@ -6,7 +6,8 @@
   "data" : [
     {
       "idiom" : "universal",
-      "filename" : "Hawk-sound.mp3"
+      "filename" : "Hawk-sound.mp3",
+      "universal-type-identifier" : "mp3"
     }
   ]
 }

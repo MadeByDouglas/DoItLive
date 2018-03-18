@@ -24,15 +24,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
 
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
-        Fabric.with([TWTRTwitter(), Crashlytics(), Answers()])
+        TWTRTwitter.sharedInstance().start(withConsumerKey: "uaghEjF7QkEgpj9A2Qsrjv1Zr", consumerSecret: "sUVqTHSlNJHzQkgPc0do5FjCl2E72N5Pe7LvYSZeIgJkULPzCn")
+        Fabric.with([Crashlytics.self, Answers.self])
         
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: Notify.Login.rawValue), object: nil, queue: nil) { (notification) -> Void in
+            
             if let twitterSession = notification.userInfo?["TWTRSession"] as? TWTRSession {
                 self.appLogin(twitterSession, facebookResult: nil)
             } else if let facebookResult = notification.userInfo?["FBSDKLoginResult"] as? FBSDKLoginManagerLoginResult {
                 self.appLogin(nil, facebookResult: facebookResult)
             } else {
-                self.appLogin(nil, facebookResult: nil) //probably should never get here
+                fatalError("Returned from login flow but has no twitter session or facebook login result") //probably should never get here
             }
 
         }
@@ -45,13 +47,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         return true
     }
-    
-    func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-        return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
+
+    // MARK: application redirect facebook
+    func loginRedirect(app: UIApplication, url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        if url.scheme == "twitterkit-uaghEjF7QkEgpj9A2Qsrjv1Zr" {
+            return TWTRTwitter.sharedInstance().application(app, open: url, options: options)
+        } else {
+            return FBSDKApplicationDelegate.sharedInstance().application(app, open: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation])
+        }
+    }
+
+    // MARK: application redirect twitter
+    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        return loginRedirect(app: app, url: url, options: options)
     }
     
     func appLogin(_ twitterSession: TWTRSession?, facebookResult: FBSDKLoginManagerLoginResult?) {
         //login handled by twitter and fb buttons
+
+        //set bool true so if user logs out and logs back in during same session it pushes camera immediately
+        UserDefaults.standard.set(true, forKey: UserDefaultsKeys.firstView.rawValue)
 
         //Answers and Crashlytics Track login
         if let session = twitterSession {
