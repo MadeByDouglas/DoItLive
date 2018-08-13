@@ -11,6 +11,7 @@ use_frameworks!
 pod 'Fabric'
 pod 'TwitterKit'
 pod 'Crashlytics'
+pod 'Swifter'
 
 pod 'Bolts'
 pod 'FBSDKCoreKit'
