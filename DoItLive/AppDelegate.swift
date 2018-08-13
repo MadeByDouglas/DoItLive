@@ -48,16 +48,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    // MARK: application redirect facebook
+    // MARK: application redirect facebook and twitter
     func loginRedirect(app: UIApplication, url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-        if url.scheme == "twitterkit-uaghEjF7QkEgpj9A2Qsrjv1Zr" {
+        if url.absoluteString.contains("twitterkit") {
             return TWTRTwitter.sharedInstance().application(app, open: url, options: options)
         } else {
             return FBSDKApplicationDelegate.sharedInstance().application(app, open: url, sourceApplication: options[UIApplicationOpenURLOptionsKey.sourceApplication] as! String, annotation: options[UIApplicationOpenURLOptionsKey.annotation])
         }
     }
 
-    // MARK: application redirect twitter
+    // MARK: application redirect overview
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
         return loginRedirect(app: app, url: url, options: options)
     }
