@@ -17,8 +17,8 @@ import JFMinimalNotifications
 
 let alignment = MemoryLayout<Int>.alignment
 
-private var CapturingStillImageContext = UnsafeMutableRawPointer.allocate(bytes: 1, alignedTo: alignment)
-private var SessionRunningContext = UnsafeMutableRawPointer.allocate(bytes: 1, alignedTo: alignment)
+private var CapturingStillImageContext = UnsafeMutableRawPointer.allocate(byteCount: 1, alignment: alignment)
+private var SessionRunningContext = UnsafeMutableRawPointer.allocate(byteCount: 1, alignment: alignment)
 
 private enum AVCamSetupResult: Int {
     case success
