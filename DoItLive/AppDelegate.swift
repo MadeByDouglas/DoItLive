@@ -29,8 +29,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: Notify.Login.rawValue), object: nil, queue: nil) { (notification) -> Void in
             
-            if let twitterSession = notification.userInfo?["TWTRSession"] as? TWTRSession {
-                self.appLogin(twitterSession, facebookResult: nil)
+            if let twitterSession = notification.userInfo?["TWTRSession"] {
+                //casting is not working for some reason so need this work around
+                let session = twitterSession as! TWTRSession ?? TWTRTwitter.sharedInstance().sessionStore.session()
+                self.appLogin(session, facebookResult: nil)
             } else if let facebookResult = notification.userInfo?["FBSDKLoginResult"] as? FBSDKLoginManagerLoginResult {
                 self.appLogin(nil, facebookResult: facebookResult)
             } else {
@@ -62,7 +64,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return loginRedirect(app: app, url: url, options: options)
     }
     
-    func appLogin(_ twitterSession: TWTRSession?, facebookResult: FBSDKLoginManagerLoginResult?) {
+    func appLogin(_ twitterSession: TWTRAuthSession?, facebookResult: FBSDKLoginManagerLoginResult?) {
         //login handled by twitter and fb buttons
 
         //set bool true so if user logs out and logs back in during same session it pushes camera immediately

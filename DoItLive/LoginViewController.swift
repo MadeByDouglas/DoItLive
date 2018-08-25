@@ -34,7 +34,7 @@ class LoginViewController: UIViewController, QLPreviewControllerDataSource, FBSD
             if let unwrappedSession = session {
 
                 //log in notification
-                let sessionDict: [String: TWTRSession] = ["TWTRSession": unwrappedSession]
+                let sessionDict: [String: TWTRAuthSession] = ["TWTRSession": unwrappedSession]
                 NotificationCenter.default.post(name: Notification.Name(rawValue: Notify.Login.rawValue), object: nil, userInfo: sessionDict)
                 
             } else {
